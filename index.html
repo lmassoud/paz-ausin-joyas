@@ -35,6 +35,8 @@
 
   * { box-sizing: border-box; }
 
+  html { scroll-behavior: smooth; }
+
   body {
     margin: 0;
     background: var(--bg);
@@ -53,6 +55,12 @@
 
   /* ---------- Barra superior ---------- */
   .topbar {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(11,10,9,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .topbar-inner {
     display: flex; align-items: center; justify-content: space-between;
     padding: 18px 22px; max-width: var(--maxw); margin: 0 auto;
   }
@@ -87,6 +95,7 @@
     max-width: 440px; margin: 0 auto; font-size: 15px; line-height: 1.9;
     letter-spacing: 0.04em; color: var(--text-soft);
   }
+  .hero-cta { margin-top: 34px; }
 
   /* ---------- Secciones de catálogo ---------- */
   section.catalog { max-width: var(--maxw); margin: 0 auto; padding: 0 22px 20px; }
@@ -103,6 +112,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 14px;
+  }
+
+  .empty-state { text-align: center; padding: 60px 20px; }
+  .empty-state[hidden] { display: none; }
+  .empty-state p {
+    font-size: 15px; letter-spacing: 0.02em; color: var(--text-soft); margin: 0 0 26px;
   }
 
   /* Tarjeta de pieza (disponible) */
@@ -219,8 +234,19 @@
   /* Foco visible para accesibilidad */
   a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
+  /* ---------- Responsive ---------- */
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .card .name { font-size: 16px; }
+    .sold .name { font-size: 15px; }
+    .topbar-inner { padding: 14px 16px; }
+    .brand-mark { font-size: 15px; }
+    .nav { gap: 10px; font-size: 9.5px; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
   }
 </style>
 </head>
@@ -228,11 +254,15 @@
 
   <!-- Barra superior -->
   <div class="topbar">
-    <span class="brand-mark">Paz Ausin</span>
-    <nav class="nav">
-      <a id="nav-ig" href="#" target="_blank" rel="noopener">Instagram</a>
-      <a id="nav-wa" class="wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
-    </nav>
+    <div class="topbar-inner">
+      <span class="brand-mark">Paz Ausin</span>
+      <nav class="nav">
+        <a href="#disponible">Piezas</a>
+        <a href="#portafolio">Portafolio</a>
+        <a id="nav-ig" href="#" target="_blank" rel="noopener">Instagram</a>
+        <a id="nav-wa" class="wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+      </nav>
+    </div>
   </div>
 
   <!-- Hero -->
@@ -241,22 +271,27 @@
     <h1 class="serif">Paz Ausin<br><span class="italic">Joyas</span></h1>
     <div class="flourish"><span class="l"></span><span>✦</span><span class="r"></span></div>
     <p>Joyería fina hecha a mano · Piezas únicas<br>Plata 950 · Oro 18K · Piedras naturales</p>
+    <a href="#disponible" class="btn btn-ghost hero-cta">Ver piezas disponibles</a>
   </section>
 
   <!-- Disponible ahora -->
-  <section class="catalog">
+  <section class="catalog" id="disponible">
     <div class="section-head">
       <h2 class="serif">Disponible ahora</h2>
       <span class="hint">Toca una pieza</span>
     </div>
     <div class="grid" id="grid-available"></div>
+    <div class="empty-state" id="empty-available" hidden>
+      <p>Las piezas disponibles vuelan ✦ Hay nuevas en camino.</p>
+      <a class="btn btn-primary" id="empty-wa" href="#" target="_blank" rel="noopener">Avísame cuando haya piezas nuevas</a>
+    </div>
   </section>
 
   <!-- Divisor -->
   <div class="divider"><span class="rule"></span><span>✦</span><span class="rule"></span></div>
 
   <!-- Portafolio -->
-  <section class="catalog">
+  <section class="catalog" id="portafolio">
     <div class="portfolio-head">
       <h2 class="serif">Portafolio</h2>
       <p>Trabajos realizados · ¿Quieres algo parecido? Escríbeme.</p>
@@ -357,7 +392,7 @@ function cardAvailable(item, index) {
     <div class="thumb">
       <span class="corner">✦</span>
       ${item.img ? `<img src="${item.img}" alt="${item.name}">` : `<span class="ghost">✦</span>`}
-      <span class="slot">foto · ${item.slot}</span>
+      ${!item.img ? `<span class="slot">foto · ${item.slot}</span>` : ''}
     </div>
     <div class="name">${item.name}</div>`;
   btn.addEventListener('click', () => openDetail(item));
@@ -372,7 +407,7 @@ function cardSold(item) {
     <div class="thumb">
       ${item.img ? `<img src="${item.img}" alt="${item.name}">` : `<span class="ghost">✦</span>`}
       <span class="badge">Vendido</span>
-      <span class="slot">foto · ${item.slot}</span>
+      ${!item.img ? `<span class="slot">foto · ${item.slot}</span>` : ''}
     </div>
     <div class="name">${item.name}</div>`;
   return div;
@@ -380,7 +415,15 @@ function cardSold(item) {
 
 const gridA = document.getElementById('grid-available');
 const gridS = document.getElementById('grid-sold');
-AVAILABLE.forEach((it, i) => gridA.appendChild(cardAvailable(it, i)));
+const emptyAvailable = document.getElementById('empty-available');
+
+if (AVAILABLE.length === 0) {
+  gridA.hidden = true;
+  emptyAvailable.hidden = false;
+  document.getElementById('empty-wa').href = waLink('Hola! Quiero que me avises cuando haya piezas nuevas disponibles');
+} else {
+  AVAILABLE.forEach((it, i) => gridA.appendChild(cardAvailable(it, i)));
+}
 SOLD.forEach(it => gridS.appendChild(cardSold(it)));
 
 // ---- Overlay de detalle ----
