@@ -97,6 +97,15 @@
   }
   .hero-cta { margin-top: 34px; }
 
+  /* ---------- Cómo comprar ---------- */
+  .how-to-buy {
+    max-width: var(--maxw); margin: 0 auto; padding: 0 22px 72px;
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+    gap: 10px 16px; text-align: center;
+    font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .how-to-buy .sep { color: var(--accent); }
+
   /* ---------- Secciones de catálogo ---------- */
   section.catalog { max-width: var(--maxw); margin: 0 auto; padding: 0 22px 20px; }
   .section-head {
@@ -155,6 +164,11 @@
     margin: 0 0 8px; letter-spacing: 0.01em;
   }
   .portfolio-head p { font-size: 13px; letter-spacing: 0.05em; color: var(--text-dim); margin: 0; }
+  .portfolio-head .wa-link {
+    color: var(--accent); text-decoration: underline;
+    text-decoration-color: rgba(198,161,91,0.4); text-underline-offset: 3px;
+  }
+  .portfolio-head .wa-link:hover { text-decoration-color: var(--accent); }
   .sold { opacity: 0.86; }
   .sold .thumb { background: repeating-linear-gradient(135deg, var(--sold-a) 0 11px, var(--sold-b) 11px 22px); }
   .sold .ghost { font-size: 30px; color: rgba(237,233,226,0.07); }
@@ -177,7 +191,8 @@
   /* ---------- Footer ---------- */
   footer { border-top: 1px solid var(--line); padding: 56px 22px 64px; text-align: center; }
   footer .fname { font-family: 'Cormorant Garamond', serif; font-size: 26px; letter-spacing: 0.06em; margin-bottom: 8px; }
-  footer .ftag { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 30px; }
+  footer .ftag { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 14px; }
+  footer .footer-note { font-size: 12px; color: var(--text-faint); margin: 0 0 30px; }
   .footer-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
   .btn {
     text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
@@ -220,6 +235,7 @@
   }
   .sheet-body { padding: 26px 26px 30px; }
   .sheet-body .status { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  .sheet-body .status.is-sold { color: var(--text-dim); }
   .sheet-body h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 32px; margin: 0 0 6px; line-height: 1.05; }
   .sheet-body .price { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #E6E1D8; margin-bottom: 18px; }
   .sheet-body .desc { font-size: 14.5px; line-height: 1.9; letter-spacing: 0.03em; color: var(--text-soft); margin: 0 0 8px; }
@@ -242,6 +258,7 @@
     .topbar-inner { padding: 14px 16px; }
     .brand-mark { font-size: 15px; }
     .nav { gap: 10px; font-size: 9.5px; }
+    .how-to-buy { flex-direction: column; gap: 10px; padding-bottom: 56px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -274,6 +291,15 @@
     <a href="#disponible" class="btn btn-ghost hero-cta">Ver piezas disponibles</a>
   </section>
 
+  <!-- Cómo comprar -->
+  <div class="how-to-buy">
+    <span>Elige tu pieza</span>
+    <span class="sep">✦</span>
+    <span>Escríbeme por WhatsApp</span>
+    <span class="sep">✦</span>
+    <span>Coordinamos pago y entrega</span>
+  </div>
+
   <!-- Disponible ahora -->
   <section class="catalog" id="disponible">
     <div class="section-head">
@@ -294,7 +320,7 @@
   <section class="catalog" id="portafolio">
     <div class="portfolio-head">
       <h2 class="serif">Portafolio</h2>
-      <p>Trabajos realizados · ¿Quieres algo parecido? Escríbeme.</p>
+      <p>Trabajos realizados · ¿Quieres algo parecido? <a id="portfolio-wa" class="wa-link" href="#" target="_blank" rel="noopener">Escríbeme.</a></p>
     </div>
     <div class="grid" id="grid-sold"></div>
   </section>
@@ -310,6 +336,7 @@
   <footer>
     <div class="fname serif">Paz Ausin Joyas</div>
     <div class="ftag">Hecho a mano en Chile</div>
+    <p class="footer-note">Entrega y pago se coordinan directo por WhatsApp</p>
     <div class="footer-actions">
       <a id="foot-wa" class="btn btn-primary" href="#" target="_blank" rel="noopener">Escribir por WhatsApp</a>
       <a id="foot-ig" class="btn btn-ghost" href="#" target="_blank" rel="noopener">@pazausin</a>
@@ -326,13 +353,13 @@
         <button class="close" id="sheet-close" aria-label="Cerrar">✕</button>
       </div>
       <div class="sheet-body">
-        <div class="status">Disponible</div>
+        <div class="status" id="sheet-status">Disponible</div>
         <h3 class="serif" id="sheet-name"></h3>
         <div class="price serif" id="sheet-price"></div>
         <p class="desc" id="sheet-desc"></p>
         <p class="materials" id="sheet-materials"></p>
         <a class="wa" id="sheet-wa" href="#" target="_blank" rel="noopener">Consultar por WhatsApp</a>
-        <p class="note">Precio referencial · por confirmar</p>
+        <p class="note" id="sheet-note">Precio referencial · por confirmar</p>
       </div>
     </div>
   </div>
@@ -383,6 +410,7 @@ document.getElementById('nav-ig').href   = CONFIG.instagram;
 document.getElementById('foot-ig').href  = CONFIG.instagram;
 document.getElementById('nav-wa').href   = waGeneral;
 document.getElementById('foot-wa').href  = waGeneral;
+document.getElementById('portfolio-wa').href = waLink('Hola! Vi el portafolio y me gustaría encargar una pieza personalizada');
 
 // Dibuja una tarjeta disponible
 function cardAvailable(item, index) {
@@ -401,16 +429,17 @@ function cardAvailable(item, index) {
 
 // Dibuja una tarjeta vendida
 function cardSold(item) {
-  const div = document.createElement('div');
-  div.className = 'card sold';
-  div.innerHTML = `
+  const btn = document.createElement('button');
+  btn.className = 'card sold';
+  btn.innerHTML = `
     <div class="thumb">
       ${item.img ? `<img src="${item.img}" alt="${item.name}">` : `<span class="ghost">✦</span>`}
       <span class="badge">Vendido</span>
       ${!item.img ? `<span class="slot">foto · ${item.slot}</span>` : ''}
     </div>
     <div class="name">${item.name}</div>`;
-  return div;
+  btn.addEventListener('click', () => openDetail(item, true));
+  return btn;
 }
 
 const gridA = document.getElementById('grid-available');
@@ -432,25 +461,44 @@ const els = {
   ghost: document.getElementById('sheet-ghost'),
   img: document.getElementById('sheet-img'),
   slot: document.getElementById('sheet-slot'),
+  status: document.getElementById('sheet-status'),
   name: document.getElementById('sheet-name'),
   price: document.getElementById('sheet-price'),
   desc: document.getElementById('sheet-desc'),
   materials: document.getElementById('sheet-materials'),
   wa: document.getElementById('sheet-wa'),
+  note: document.getElementById('sheet-note'),
 };
 
-function openDetail(item) {
+function openDetail(item, isSold) {
   els.name.textContent = item.name;
-  els.price.textContent = item.price;
-  els.desc.textContent = item.desc;
-  els.materials.textContent = item.materials;
   els.slot.textContent = 'foto · ' + item.slot;
-  els.wa.href = waLink('Hola! Me interesa el ' + item.name + ' que vi en la página');
   if (item.img) {
     els.img.src = item.img; els.img.alt = item.name; els.img.hidden = false; els.ghost.hidden = true;
   } else {
     els.img.hidden = true; els.ghost.hidden = false;
   }
+
+  if (isSold) {
+    els.status.textContent = 'Vendido';
+    els.status.classList.add('is-sold');
+    els.price.hidden = true;
+    els.desc.hidden = true;
+    els.materials.hidden = true;
+    els.wa.textContent = 'Encargar una pieza similar';
+    els.wa.href = waLink('Hola! Me gustó el ' + item.name + ' del portafolio. ¿Podrías hacer algo parecido?');
+    els.note.textContent = 'Cada pieza es única — se puede crear una versión nueva inspirada en esta.';
+  } else {
+    els.status.textContent = 'Disponible';
+    els.status.classList.remove('is-sold');
+    els.price.hidden = false; els.price.textContent = item.price;
+    els.desc.hidden = false; els.desc.textContent = item.desc;
+    els.materials.hidden = false; els.materials.textContent = item.materials;
+    els.wa.textContent = 'Consultar por WhatsApp';
+    els.wa.href = waLink('Hola! Me interesa el ' + item.name + ' que vi en la página');
+    els.note.textContent = 'Precio referencial · por confirmar';
+  }
+
   overlay.hidden = false;
   document.body.style.overflow = 'hidden';
   document.getElementById('sheet-close').focus();
