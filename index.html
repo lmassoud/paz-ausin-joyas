@@ -240,11 +240,19 @@
   }
   @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
   .sheet-photo {
-    position: relative; aspect-ratio: 1/1;
+    position: relative; aspect-ratio: 1/1; overflow: hidden;
     background: repeating-linear-gradient(135deg, var(--card-a) 0 14px, var(--card-b) 14px 28px);
     display: flex; align-items: center; justify-content: center;
   }
-  .sheet-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .photo-track {
+    position: absolute; inset: 0; display: flex; height: 100%;
+    touch-action: pan-y; cursor: grab;
+  }
+  .photo-track:active { cursor: grabbing; }
+  .photo-track .slide {
+    flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover;
+    user-select: none; -webkit-user-drag: none; pointer-events: none;
+  }
   .sheet-photo .ghost { font-family: 'Cormorant Garamond', serif; font-size: 52px; color: rgba(237,233,226,0.10); }
   .sheet-photo .slot {
     position: absolute; bottom: 16px; left: 0; right: 0; text-align: center;
@@ -262,10 +270,16 @@
   }
   .photo-nav.prev { left: 14px; }
   .photo-nav.next { right: 14px; }
-  .photo-count {
-    position: absolute; top: 14px; left: 14px; font-size: 11px; letter-spacing: 0.08em;
-    color: var(--text); background: rgba(16,14,11,0.7); padding: 5px 10px; border-radius: 999px;
+  .photo-dots {
+    position: absolute; bottom: 16px; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
   }
+  .photo-dots .dot {
+    width: 6px; height: 6px; border-radius: 999px; background: transparent;
+    border: 1px solid rgba(237,233,226,0.45);
+    transition: background-color .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .photo-dots .dot.active { background: var(--accent); border-color: var(--accent); transform: scale(1.2); }
   .sheet-body { padding: 26px 26px 30px; }
   .sheet-body .status { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
   .sheet-body .status.is-sold { color: var(--text-dim); }
@@ -379,13 +393,13 @@
   <!-- Overlay de detalle (se llena por JS) -->
   <div class="overlay" id="overlay" hidden>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-name">
-      <div class="sheet-photo">
+      <div class="sheet-photo" id="sheet-photo">
         <span class="ghost" id="sheet-ghost">✦</span>
-        <img id="sheet-img" alt="" hidden loading="lazy" decoding="async">
+        <div class="photo-track" id="photo-track"></div>
         <span class="slot" id="sheet-slot">foto</span>
         <button class="photo-nav prev" id="sheet-prev" aria-label="Foto anterior" hidden>‹</button>
         <button class="photo-nav next" id="sheet-next" aria-label="Foto siguiente" hidden>›</button>
-        <span class="photo-count" id="sheet-count" hidden></span>
+        <div class="photo-dots" id="sheet-dots" hidden></div>
         <button class="close" id="sheet-close" aria-label="Cerrar">✕</button>
       </div>
       <div class="sheet-body">
@@ -505,12 +519,13 @@ SOLD.forEach(it => gridS.appendChild(cardSold(it)));
 // ---- Overlay de detalle ----
 const overlay = document.getElementById('overlay');
 const els = {
+  photoWrap: document.getElementById('sheet-photo'),
   ghost: document.getElementById('sheet-ghost'),
-  img: document.getElementById('sheet-img'),
+  track: document.getElementById('photo-track'),
   slot: document.getElementById('sheet-slot'),
   prev: document.getElementById('sheet-prev'),
   next: document.getElementById('sheet-next'),
-  count: document.getElementById('sheet-count'),
+  dots: document.getElementById('sheet-dots'),
   status: document.getElementById('sheet-status'),
   name: document.getElementById('sheet-name'),
   price: document.getElementById('sheet-price'),
@@ -520,42 +535,170 @@ const els = {
   note: document.getElementById('sheet-note'),
 };
 
-// Galería de fotos dentro del overlay (una o varias por pieza)
+// Galería de fotos dentro del overlay (una o varias por pieza), con
+// deslizamiento estilo Instagram (Pointer Events: mouse y touch a la vez).
 let currentPhotos = [];
 let currentPhotoIndex = 0;
+let currentPhotoName = '';
+let dragState = null;
 
-function renderPhoto() {
-  const src = currentPhotos[currentPhotoIndex];
-  if (src) {
-    els.img.src = src; els.img.hidden = false; els.ghost.hidden = true;
-  } else {
-    els.img.hidden = true; els.ghost.hidden = false;
-  }
-  const multi = currentPhotos.length > 1;
-  els.prev.hidden = !multi;
-  els.next.hidden = !multi;
-  els.count.hidden = !multi;
-  if (multi) els.count.textContent = (currentPhotoIndex + 1) + ' / ' + currentPhotos.length;
+function multiPhoto() { return currentPhotos.length > 1; }
+function isAtStart() { return currentPhotoIndex === 0; }
+function isAtEnd() { return currentPhotoIndex === currentPhotos.length - 1; }
+
+// Todas las fotos de la pieza se cargan de una (no son muchas por pieza),
+// así que al abrir el overlay la siguiente/anterior ya están listas: no
+// hay salto en blanco al deslizar.
+function buildTrack() {
+  els.track.innerHTML = currentPhotos.map((src) =>
+    `<img class="slide" src="${src}" alt="${currentPhotoName}" loading="eager" decoding="async">`
+  ).join('');
 }
 
-els.prev.addEventListener('click', (e) => {
-  e.stopPropagation();
-  currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length;
-  renderPhoto();
-});
-els.next.addEventListener('click', (e) => {
-  e.stopPropagation();
-  currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length;
-  renderPhoto();
-});
+function updateDots() {
+  const show = multiPhoto();
+  els.dots.hidden = !show;
+  if (!show) { els.dots.innerHTML = ''; return; }
+  if (els.dots.children.length !== currentPhotos.length) {
+    els.dots.innerHTML = currentPhotos.map(() => '<span class="dot"></span>').join('');
+  }
+  Array.from(els.dots.children).forEach((dot, i) => dot.classList.toggle('active', i === currentPhotoIndex));
+}
+
+function updateGalleryChrome() {
+  const has = currentPhotos.length > 0;
+  els.ghost.hidden = has;
+  els.track.hidden = !has;
+  els.slot.hidden = has;
+  els.prev.hidden = !multiPhoto();
+  els.next.hidden = !multiPhoto();
+  updateDots();
+}
+
+function goToIndex(index, animate) {
+  currentPhotoIndex = Math.max(0, Math.min(index, currentPhotos.length - 1));
+  els.track.style.transition = animate ? 'transform 220ms ease-out' : '';
+  els.track.style.transform = 'translateX(-' + (currentPhotoIndex * 100) + '%)';
+  updateDots();
+}
+
+function stepPhoto(dir) {
+  const len = currentPhotos.length;
+  goToIndex((currentPhotoIndex + dir + len) % len, true);
+}
+
+els.prev.addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(-1); });
+els.next.addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(1); });
+
+// Resistencia leve (rubber-band) al tirar más allá de la primera/última foto,
+// en vez de un tope seco o dejar dar la vuelta.
+function rubberBand(delta, dim) {
+  const d = Math.max(dim, 1);
+  const c = 0.55;
+  return (delta * d * c) / (d + c * Math.abs(delta));
+}
+
+function computeDragOffset(rawDelta, width) {
+  if ((isAtStart() && rawDelta > 0) || (isAtEnd() && rawDelta < 0)) {
+    return rubberBand(rawDelta, width);
+  }
+  return rawDelta;
+}
+
+function setTrackOffset(offsetPx) {
+  els.track.style.transform = 'translateX(calc(-' + (currentPhotoIndex * 100) + '% + ' + offsetPx + 'px))';
+}
+
+// Mientras se arrastra, el punto activo salta en tiempo real al cruzar la
+// mitad del recorrido (la transición suave la hace el CSS de .dot).
+function updateDotsForDrag(offsetPx, width) {
+  if (!multiPhoto()) return;
+  const progress = offsetPx / width;
+  let liveIndex = currentPhotoIndex;
+  if (progress <= -0.5 && !isAtEnd()) liveIndex = currentPhotoIndex + 1;
+  else if (progress >= 0.5 && !isAtStart()) liveIndex = currentPhotoIndex - 1;
+  Array.from(els.dots.children).forEach((dot, i) => dot.classList.toggle('active', i === liveIndex));
+}
+
+function onPhotoPointerDown(e) {
+  if (!multiPhoto()) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  dragState = {
+    id: e.pointerId,
+    startX: e.clientX,
+    startY: e.clientY,
+    deltaX: 0,
+    axis: null,
+    width: els.photoWrap.getBoundingClientRect().width || 1,
+    startTime: performance.now(),
+  };
+  els.track.style.transition = 'none';
+  try { els.track.setPointerCapture(e.pointerId); } catch (err) { /* algunos navegadores son quisquillosos con esto; el drag igual funciona */ }
+}
+
+function onPhotoPointerMove(e) {
+  if (!dragState || e.pointerId !== dragState.id) return;
+  const dx = e.clientX - dragState.startX;
+  const dy = e.clientY - dragState.startY;
+
+  if (dragState.axis === null) {
+    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    dragState.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+  }
+  if (dragState.axis !== 'x') return; // gesto vertical: se lo dejamos al scroll de la página
+
+  e.preventDefault();
+  dragState.deltaX = dx;
+  const offset = computeDragOffset(dx, dragState.width);
+  setTrackOffset(offset);
+  updateDotsForDrag(offset, dragState.width);
+}
+
+function endPhotoDrag() {
+  if (!dragState) return;
+  const { deltaX, width, startTime, axis } = dragState;
+  dragState = null;
+  if (axis !== 'x') return; // no hubo arrastre horizontal real, nada que resolver
+
+  const elapsed = Math.max(performance.now() - startTime, 1);
+  const velocity = Math.abs(deltaX) / elapsed; // px/ms
+  const passedThreshold = Math.abs(deltaX) > width * 0.2 || velocity > 0.5;
+
+  let target = currentPhotoIndex;
+  if (passedThreshold) {
+    if (deltaX < 0 && !isAtEnd()) target += 1;
+    else if (deltaX > 0 && !isAtStart()) target -= 1;
+  }
+  goToIndex(target, true);
+}
+
+function onPhotoPointerUp(e) {
+  if (!dragState || e.pointerId !== dragState.id) return;
+  if (els.track.hasPointerCapture(e.pointerId)) els.track.releasePointerCapture(e.pointerId);
+  endPhotoDrag();
+}
+
+function onPhotoPointerCancel(e) {
+  if (!dragState || e.pointerId !== dragState.id) return;
+  dragState = null;
+  goToIndex(currentPhotoIndex, true);
+}
+
+els.track.addEventListener('pointerdown', onPhotoPointerDown);
+els.track.addEventListener('pointermove', onPhotoPointerMove, { passive: false });
+els.track.addEventListener('pointerup', onPhotoPointerUp);
+els.track.addEventListener('pointercancel', onPhotoPointerCancel);
 
 function openDetail(item, isSold) {
   els.name.textContent = item.name;
   els.slot.textContent = 'foto · ' + item.slot;
-  els.img.alt = item.name;
   currentPhotos = photosOf(item);
   currentPhotoIndex = 0;
-  renderPhoto();
+  currentPhotoName = item.name;
+  buildTrack();
+  els.track.style.transition = '';
+  els.track.style.transform = 'translateX(0%)';
+  updateGalleryChrome();
 
   if (isSold) {
     els.status.textContent = 'Vendido';
@@ -589,7 +732,13 @@ function closeDetail() {
 
 document.getElementById('sheet-close').addEventListener('click', closeDetail);
 overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) closeDetail(); });
+document.addEventListener('keydown', (e) => {
+  if (overlay.hidden) return;
+  if (e.key === 'Escape') { closeDetail(); return; }
+  if (!multiPhoto()) return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); stepPhoto(-1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); stepPhoto(1); }
+});
 </script>
 </body>
 </html>
