@@ -46,8 +46,7 @@ archivo: `index.html` (HTML + CSS + JS, sin frameworks, sin build step).
 9. `404.html`: página de error mínima, misma estética, con link de vuelta al catálogo.
 
 ## Dónde están los datos editables (dentro de index.html, sección CONFIG)
-- `CONFIG.whatsapp`: número placeholder (56900000000) — reemplazar por el número de
-  negocio real cuando se consiga.
+- `CONFIG.whatsapp`: número real del negocio (56998179246).
 - `AVAILABLE[]`: piezas disponibles (nombre, slot, precio, materiales, descripción,
   fotos). Agregar una pieza = copiar un bloque y editarlo.
 - `SOLD[]`: piezas vendidas para el Portafolio (nombre, slot, fotos).
