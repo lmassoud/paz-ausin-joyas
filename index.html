@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0B0A09">
 
 <!-- Favicon: logo real (estrella plateada) -->
-<link rel="icon" type="image/png" href="fotos/paz-ausin-estrella-transparente.png">
+<link rel="icon" type="image/png" href="fotos/paz-ausin-estrella-favicon.png">
 
 <!-- JSON-LD básico para buscadores -->
 <script type="application/ld+json">
@@ -489,6 +489,8 @@ const waLink = (text) => 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeU
 // Acepta `img: 'a.jpg'` (una foto) o `imgs: ['a.jpg', 'b.jpg']` (varias)
 const photosOf = (item) => item.imgs && item.imgs.length ? item.imgs : (item.img ? [item.img] : []);
 const firstImg = (item) => photosOf(item)[0];
+// Miniatura de grilla: misma foto de portada, versión liviana en fotos/thumbs/
+const thumbSrc = (item) => { const f = firstImg(item); return f ? f.replace('fotos/', 'fotos/thumbs/') : null; };
 
 // Enlaces fijos (nav + footer)
 const waGeneral = waLink('Hola! Vi tu página y quiero consultar por una joya');
@@ -502,10 +504,10 @@ document.getElementById('portfolio-wa').href = waLink('Hola! Vi el portafolio y 
 function cardAvailable(item, index) {
   const btn = document.createElement('button');
   btn.className = 'card';
-  const thumb = firstImg(item);
+  const thumb = thumbSrc(item);
   btn.innerHTML = `
     <div class="thumb">
-      <img class="corner" src="fotos/paz-ausin-estrella-transparente.png" alt="" loading="lazy" decoding="async">
+      <img class="corner" src="fotos/paz-ausin-estrella-favicon.png" alt="" loading="lazy" decoding="async">
       ${thumb ? `<img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
       ${!thumb ? `<span class="slot">foto · ${item.slot}</span>` : ''}
     </div>
@@ -518,7 +520,7 @@ function cardAvailable(item, index) {
 function cardSold(item) {
   const btn = document.createElement('button');
   btn.className = 'card sold';
-  const thumb = firstImg(item);
+  const thumb = thumbSrc(item);
   btn.innerHTML = `
     <div class="thumb">
       ${thumb ? `<img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
