@@ -437,21 +437,48 @@ const CONFIG = {
    (anillo-sello-plata-01.jpg), lado mayor máx. 1600px, peso ideal <400 KB.
    ================================================================ */
 const AVAILABLE = [
-  { name: 'Anillo Sello Plata',  slot: 'anillo',    price: '$240.000', materials: 'Plata 950',              desc: 'Sello macizo con una estrella grabada a mano. Presencia sobria, para usar todos los días.' },
-  { name: 'Aros Estrella',       slot: 'aros',      price: '$210.000', materials: 'Plata 950',              desc: 'Aros geométricos rematados con el detalle de estrella, sello de la casa.' },
-  { name: 'Argolla Ónix Negro',  slot: 'argolla',   price: '$230.000', materials: 'Plata 950 · Ónix',       desc: 'Argolla con ónix negro y circonias. Contraste profundo sobre la plata.' },
-  { name: 'Anillo Esmeralda',    slot: 'anillo',    price: '$480.000', materials: 'Plata 950 · Esmeralda',  desc: 'Esmeralda engarzada con un halo de piedras negras. Una pieza de ocasión.' },
-  { name: 'Brazalete Estrellas', slot: 'brazalete', price: '$320.000', materials: 'Plata 950',              desc: 'Brazalete rígido grabado con una constelación de estrellas alrededor.' },
-  { name: 'Anillo Luna',         slot: 'anillo',    price: '$390.000', materials: 'Oro 18K · Piedra luna',  desc: 'Piedra luna de brillo lechoso en engarce dorado. Delicado y luminoso.' },
-  { name: 'Esclava de Plata',    slot: 'esclava',   price: '$60.000',  materials: 'Plata 950',              desc: 'Línea nueva. Diseño esencial, de trazo limpio, para el uso diario.' },
+  { name: 'Anillo Sello',            slot: 'anillo', talla: '15', price: 'Por confirmar', materials: 'Plata 950 · Diamante negro',
+    imgs: ['fotos/anillo-sello-01.jpg','fotos/anillo-sello-02.jpg','fotos/anillo-sello-03.jpg','fotos/anillo-sello-04.jpg','fotos/anillo-sello-05.jpg','fotos/anillo-sello-06.jpg','fotos/anillo-sello-07.jpg'] },
+  { name: 'Anillo Micropavé',        slot: 'anillo', talla: '13', price: 'Por confirmar', materials: 'Plata 950 · Espinelas negras · Baño rodio negro',
+    imgs: ['fotos/anillo-micropave-01.jpg','fotos/anillo-micropave-02.jpg','fotos/anillo-micropave-03.jpg','fotos/anillo-micropave-04.jpg','fotos/anillo-micropave-05.jpg'] },
+  { name: 'Anillo Aguamarina',       slot: 'anillo', talla: '13', price: 'Por confirmar', materials: 'Oro 18K · Aguamarina',
+    imgs: ['fotos/anillo-aguamarina-01.jpg','fotos/anillo-aguamarina-02.jpg','fotos/anillo-aguamarina-03.jpg','fotos/anillo-aguamarina-04.jpg','fotos/anillo-aguamarina-05.jpg','fotos/anillo-aguamarina-06.jpg'] },
+  { name: 'Aros Zafiros Blancos',    slot: 'aros',   price: 'Por confirmar', materials: 'Plata 950 · Zafiros blancos',
+    imgs: ['fotos/aros-zafiros-blancos-01.jpg','fotos/aros-zafiros-blancos-02.jpg','fotos/aros-zafiros-blancos-03.jpg','fotos/aros-zafiros-blancos-04.jpg','fotos/aros-zafiros-blancos-05.jpg'] },
+  { name: 'Anillo Rubí',             slot: 'anillo', talla: '11', price: 'Por confirmar', materials: 'Plata 950 · Rubí sintético',
+    imgs: ['fotos/anillo-rubi-01.jpg','fotos/anillo-rubi-02.jpg'] },
+  { name: 'Aros Zafiros y Diamantes',slot: 'aros',   price: 'Por confirmar', materials: 'Oro 18K · Zafiros · Diamantes',
+    imgs: ['fotos/aros-zafiros-y-diamantes-01.jpg','fotos/aros-zafiros-y-diamantes-02.jpg'] },
+  { name: 'Anillo Plata',            slot: 'anillo', talla: '15', price: 'Por confirmar', materials: 'Plata 950',
+    imgs: ['fotos/anillo-plata-01.jpg','fotos/anillo-plata-02.jpg','fotos/anillo-plata-03.jpg','fotos/anillo-plata-04.jpg'] },
+  { name: 'Anillo Aguamarina Gota',  slot: 'anillo', talla: '16', price: 'Por confirmar', materials: 'Oro 18K · Aguamarina · Topacios blancos',
+    imgs: ['fotos/anillo-aguamarina-gota-01.jpg','fotos/anillo-aguamarina-gota-02.jpg','fotos/anillo-aguamarina-gota-03.jpg','fotos/anillo-aguamarina-gota-04.jpg'] },
 ];
 
 /* Piezas ya vendidas (portafolio) — sin precio ni botón */
 const SOLD = [
-  { name: 'Colgante Medalla Estrella', slot: 'colgante' },
-  { name: 'Anillo Rubí Halo Negro',    slot: 'anillo' },
-  { name: 'Aros Abanico Oro',          slot: 'aros' },
-  { name: 'Colgante Esmeralda',        slot: 'colgante' },
+  { name: 'Anillo Esmeralda',                  slot: 'anillo', materials: 'Oro 18K · Plata 950 · Esmeralda · Espinelas negras',
+    imgs: ['fotos/anillo-esmeralda-01.jpg','fotos/anillo-esmeralda-02.jpg','fotos/anillo-esmeralda-03.jpg','fotos/anillo-esmeralda-04.jpg','fotos/anillo-esmeralda-05.jpg','fotos/anillo-esmeralda-06.jpg','fotos/anillo-esmeralda-07.jpg'] },
+  { name: 'Anillo Mosca',                      slot: 'anillo', materials: 'Plata 950 · Baño Oro 18K',
+    imgs: ['fotos/anillo-mosca-01.jpg','fotos/anillo-mosca-02.jpg','fotos/anillo-mosca-03.jpg'] },
+  { name: 'Anillo Medio Cintillo Fishtail',    slot: 'anillo', materials: 'Plata 950 · Zafiros blancos',
+    imgs: ['fotos/anillo-medio-cintillo-fishtail-01.jpg','fotos/anillo-medio-cintillo-fishtail-02.jpg','fotos/anillo-medio-cintillo-fishtail-03.jpg','fotos/anillo-medio-cintillo-fishtail-04.jpg','fotos/anillo-medio-cintillo-fishtail-05.jpg'] },
+  { name: 'Anillo Raíz de Rubí',                slot: 'anillo', materials: 'Plata 950 · Raíz de Rubí · Espinelas negras · Baño rodio negro',
+    imgs: ['fotos/anillo-raiz-de-rubi-01.jpg','fotos/anillo-raiz-de-rubi-02.jpg','fotos/anillo-raiz-de-rubi-03.jpg','fotos/anillo-raiz-de-rubi-04.jpg','fotos/anillo-raiz-de-rubi-05.jpg'] },
+  { name: 'Anillo Lady Di',                    slot: 'anillo', materials: 'Oro 18K · Plata 950 · Topacio London Blue · Espinelas negras',
+    imgs: ['fotos/anillo-lady-di-01.jpg','fotos/anillo-lady-di-02.jpg','fotos/anillo-lady-di-03.jpg','fotos/anillo-lady-di-04.jpg','fotos/anillo-lady-di-05.jpg','fotos/anillo-lady-di-06.jpg','fotos/anillo-lady-di-07.jpg'] },
+  { name: 'Anillo Sinfín',                     slot: 'anillo', materials: 'Plata 950 · Espinelas negras',
+    imgs: ['fotos/anillo-sinfin-01.jpg','fotos/anillo-sinfin-02.jpg','fotos/anillo-sinfin-03.jpg','fotos/anillo-sinfin-04.jpg'] },
+  { name: 'Anillo Compromiso Esmeralda',       slot: 'anillo', materials: 'Oro 18K · Esmeralda Colombiana · Diamantes negros',
+    imgs: ['fotos/anillo-compromiso-esmeralda-01.jpg','fotos/anillo-compromiso-esmeralda-02.jpg','fotos/anillo-compromiso-esmeralda-03.jpg','fotos/anillo-compromiso-esmeralda-04.jpg','fotos/anillo-compromiso-esmeralda-05.jpg','fotos/anillo-compromiso-esmeralda-06.jpg'] },
+  { name: 'Transformación Anillo Compromiso',  slot: 'anillo', materials: 'Oro Blanco 18K · Diamantes y Moissanitas',
+    imgs: ['fotos/transformacion-anillo-compromiso-01.jpg','fotos/transformacion-anillo-compromiso-02.jpg','fotos/transformacion-anillo-compromiso-03.jpg','fotos/transformacion-anillo-compromiso-04.jpg','fotos/transformacion-anillo-compromiso-05.jpg','fotos/transformacion-anillo-compromiso-06.jpg'] },
+  { name: 'Anillo 3 Turmalinas',               slot: 'anillo', materials: 'Plata 950 · Turmalinas verdes',
+    imgs: ['fotos/anillo-3-turmalinas-01.jpg','fotos/anillo-3-turmalinas-02.jpg'] },
+  { name: 'Anillo Solitario en Bruto',         slot: 'anillo', materials: 'Plata 950 · Rubí en bruto',
+    imgs: ['fotos/anillo-solitario-en-bruto-01.jpg','fotos/anillo-solitario-en-bruto-02.jpg','fotos/anillo-solitario-en-bruto-03.jpg','fotos/anillo-solitario-en-bruto-04.jpg'] },
+  { name: 'Anillo Turmalina Guinda',           slot: 'anillo', materials: 'Plata 950 · Turmalina · Zafiros champagne',
+    imgs: ['fotos/anillo-turmalina-guinda-01.jpg','fotos/anillo-turmalina-guinda-02.jpg','fotos/anillo-turmalina-guinda-03.jpg','fotos/anillo-turmalina-guinda-04.jpg','fotos/anillo-turmalina-guinda-05.jpg'] },
 ];
 
 /* ================================================================
@@ -713,8 +740,9 @@ function openDetail(item, isSold) {
     els.status.textContent = 'Disponible';
     els.status.classList.remove('is-sold');
     els.price.hidden = false; els.price.textContent = item.price;
-    els.desc.hidden = false; els.desc.textContent = item.desc;
-    els.materials.hidden = false; els.materials.textContent = item.materials;
+    els.desc.hidden = !item.desc; if (item.desc) els.desc.textContent = item.desc;
+    els.materials.hidden = false;
+    els.materials.textContent = item.materials + (item.talla ? ' · Talla ' + item.talla : '');
     els.wa.textContent = 'Consultar por WhatsApp';
     els.wa.href = waLink('Hola! Me interesa el ' + item.name + ' que vi en la página');
     els.note.textContent = 'Precio referencial · por confirmar';
