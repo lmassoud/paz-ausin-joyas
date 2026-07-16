@@ -18,6 +18,8 @@
 <!-- Favicon: logo real (estrella plateada) -->
 <link rel="icon" type="image/png" href="fotos/paz-ausin-estrella-favicon.png">
 
+<link rel="preload" as="image" href="fotos/hero.jpg">
+
 <!-- JSON-LD básico para buscadores -->
 <script type="application/ld+json">
 {
@@ -97,7 +99,8 @@
   .nav a:hover { color: var(--text); }
 
   /* ---------- Hero ---------- */
-  .hero { max-width: var(--maxw); margin: 0 auto; padding: 84px 22px 96px; text-align: center; }
+  .hero { max-width: var(--maxw); margin: 0 auto; padding: 84px 22px 96px; text-align: center;
+    background: linear-gradient(180deg, rgba(11,10,9,.5) 0%, rgba(11,10,9,.72) 55%, #0B0A09 100%), url('fotos/hero.jpg') center bottom/cover no-repeat; }
   .eyebrow {
     font-size: 13px; letter-spacing: 0.42em; text-transform: uppercase;
     color: var(--accent); margin-bottom: 30px;
