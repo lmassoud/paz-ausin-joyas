@@ -40,7 +40,7 @@
   :root {
     --bg:          #0B0A09;   /* fondo general (casi negro cálido) */
     --text:        #EDE9E2;   /* texto principal */
-    --text-soft:   #A7A29A;   /* párrafos */
+    --text-soft:   #E3DCCF;   /* párrafos */
     --text-dim:    #8C8880;   /* texto secundario */
     --text-faint:  #6E6A63;   /* etiquetas tenues */
     --text-faintest:#55524C;  /* casi invisible */
@@ -88,18 +88,18 @@
   }
   .brand-mark {
     font-family: 'Cormorant Garamond', serif; font-size: 19px;
-    letter-spacing: 0.14em; text-transform: uppercase; color: var(--text);
+    letter-spacing: 0.03em; color: var(--text);
   }
   .nav { display: flex; gap: 20px; align-items: center;
-    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
-  .nav a { text-decoration: none; color: var(--text-dim); transition: color .2s; }
+    font-size: 12px; letter-spacing: 0.04em; }
+  .nav a { text-decoration: none; color: var(--text-soft); transition: color .2s; }
   .nav a.wa { color: var(--accent); }
   .nav a:hover { color: var(--text); }
 
   /* ---------- Hero ---------- */
   .hero { max-width: var(--maxw); margin: 0 auto; padding: 84px 22px 96px; text-align: center; }
   .eyebrow {
-    font-size: 13px; letter-spacing: 0.42em; text-transform: uppercase;
+    font-size: 13px; letter-spacing: 0.05em;
     color: var(--accent); margin-bottom: 30px;
   }
   .hero h1 {
@@ -124,7 +124,7 @@
     max-width: var(--maxw); margin: 0 auto; padding: 0 22px 72px;
     display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
     gap: 10px 16px; text-align: center;
-    font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim);
+    font-size: 11px; letter-spacing: 0.04em; color: var(--text-soft);
   }
   .how-to-buy .sep { color: var(--accent); }
 
@@ -135,9 +135,9 @@
   }
   .section-head h2 {
     font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 30px;
-    margin: 0; letter-spacing: 0.01em;
+    margin: 0; letter-spacing: 0.02em;
   }
-  .hint { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-faint); }
+  .hint { font-size: 11px; letter-spacing: 0.05em; color: var(--text-soft); }
 
   .grid {
     display: grid;
@@ -169,7 +169,8 @@
     position: absolute; bottom: 12px; left: 0; right: 0; text-align: center;
     font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faintest);
   }
-  .card .name { padding: 12px 2px 4px; font-family: 'Cormorant Garamond', serif; font-size: 19px; color: #E6E1D8; }
+  .card .name { padding: 12px 2px 4px; font-family: 'Cormorant Garamond', serif; font-size: 19px; letter-spacing: 0.02em; color: #E6E1D8; }
+  .card .materials { font-size: 11px; letter-spacing: 0.04em; color: var(--accent); margin-top: 2px; }
 
   /* ---------- Divisor con estrella ---------- */
   .divider {
@@ -183,9 +184,9 @@
   .portfolio-head { text-align: center; margin-bottom: 30px; }
   .portfolio-head h2 {
     font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 30px;
-    margin: 0 0 8px; letter-spacing: 0.01em;
+    margin: 0 0 8px; letter-spacing: 0.02em;
   }
-  .portfolio-head p { font-size: 13px; letter-spacing: 0.05em; color: var(--text-dim); margin: 0; }
+  .portfolio-head p { font-size: 13px; letter-spacing: 0.05em; color: var(--text-soft); margin: 0; }
   .portfolio-head .wa-link {
     color: var(--accent); text-decoration: underline;
     text-decoration-color: rgba(198,161,91,0.4); text-underline-offset: 3px;
@@ -195,11 +196,12 @@
   .sold .thumb { background: repeating-linear-gradient(135deg, var(--sold-a) 0 11px, var(--sold-b) 11px 22px); }
   .sold .ghost { font-size: 30px; color: rgba(237,233,226,0.07); }
   .badge {
-    position: absolute; top: 12px; right: 12px; font-size: 9.5px; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--text-dim);
+    position: absolute; top: 12px; right: 12px; font-size: 9.5px; letter-spacing: 0.05em;
+    color: var(--text-soft); background: rgba(11,10,9,.75);
     border: 1px solid rgba(255,255,255,0.14); padding: 3px 8px; border-radius: 999px;
   }
-  .sold .name { color: #B8B3AA; font-size: 18px; }
+  .sold .name { color: #B8B3AA; font-size: 18px; letter-spacing: 0.02em; }
+  .sold .materials { color: var(--text-soft); }
 
   /* ---------- Sobre la orfebre ---------- */
   .about { max-width: 620px; margin: 0 auto; padding: 92px 22px; text-align: center; }
@@ -213,8 +215,8 @@
   /* ---------- Footer ---------- */
   footer { border-top: 1px solid var(--line); padding: 56px 22px 64px; text-align: center; }
   footer .fname { font-family: 'Cormorant Garamond', serif; font-size: 26px; letter-spacing: 0.06em; margin-bottom: 8px; }
-  footer .ftag { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 14px; }
-  footer .footer-note { font-size: 12px; color: var(--text-faint); margin: 0 0 30px; }
+  footer .ftag { font-size: 12px; letter-spacing: 0.04em; color: var(--text-soft); margin-bottom: 14px; }
+  footer .footer-note { font-size: 12px; color: var(--text-soft); margin: 0 0 30px; }
   .footer-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
   .btn {
     text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
@@ -281,12 +283,13 @@
   }
   .photo-dots .dot.active { background: var(--accent); border-color: var(--accent); transform: scale(1.2); }
   .sheet-body { padding: 26px 26px 30px; }
-  .sheet-body .status { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
-  .sheet-body .status.is-sold { color: var(--text-dim); }
-  .sheet-body h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 32px; margin: 0 0 6px; line-height: 1.05; }
+  .sheet-body .status { font-size: 11px; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 12px; }
+  .sheet-body .status.is-sold { color: var(--text-soft); }
+  .sheet-body h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 32px; margin: 0 0 6px; line-height: 1.05; letter-spacing: 0.02em; }
   .sheet-body .price { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #E6E1D8; margin-bottom: 18px; }
   .sheet-body .desc { font-size: 14.5px; line-height: 1.9; letter-spacing: 0.03em; color: var(--text-soft); margin: 0 0 8px; }
-  .sheet-body .materials { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin: 0 0 26px; }
+  .sheet-body .materials { font-size: 12px; letter-spacing: 0.05em; color: var(--text-faint); margin: 0 0 26px; }
+  .sheet-body .materials.is-sold { color: var(--text-soft); }
   .sheet-body .wa {
     text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-ink); font-size: 14px; letter-spacing: 0.1em;
@@ -512,7 +515,8 @@ function cardAvailable(item, index) {
       ${thumb ? `<img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
       ${!thumb ? `<span class="slot">foto · ${item.slot}</span>` : ''}
     </div>
-    <div class="name">${item.name}</div>`;
+    <div class="name">${item.name}</div>
+    <div class="materials">${item.materials}</div>`;
   btn.addEventListener('click', () => openDetail(item));
   return btn;
 }
@@ -528,7 +532,8 @@ function cardSold(item) {
       <span class="badge">Vendido</span>
       ${!thumb ? `<span class="slot">foto · ${item.slot}</span>` : ''}
     </div>
-    <div class="name">${item.name}</div>`;
+    <div class="name">${item.name}</div>
+    <div class="materials">${item.materials}</div>`;
   btn.addEventListener('click', () => openDetail(item, true));
   return btn;
 }
@@ -735,7 +740,9 @@ function openDetail(item, isSold) {
     els.status.classList.add('is-sold');
     els.price.hidden = true;
     els.desc.hidden = true;
-    els.materials.hidden = true;
+    els.materials.hidden = false;
+    els.materials.classList.add('is-sold');
+    els.materials.textContent = item.materials;
     els.wa.textContent = 'Encargar una pieza similar';
     els.wa.href = waLink('Hola! Me gustó el ' + item.name + ' del portafolio. ¿Podrías hacer algo parecido?');
     els.note.textContent = 'Cada pieza es única — se puede crear una versión nueva inspirada en esta.';
@@ -745,6 +752,7 @@ function openDetail(item, isSold) {
     els.price.hidden = false; els.price.textContent = item.price;
     els.desc.hidden = !item.desc; if (item.desc) els.desc.textContent = item.desc;
     els.materials.hidden = false;
+    els.materials.classList.remove('is-sold');
     els.materials.textContent = item.materials + (item.talla ? ' · Talla ' + item.talla : '');
     els.wa.textContent = 'Consultar por WhatsApp';
     els.wa.href = waLink('Hola! Me interesa el ' + item.name + ' que vi en la página');
