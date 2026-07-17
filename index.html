@@ -45,6 +45,7 @@
     --text-faint:  #6E6A63;   /* etiquetas tenues */
     --text-faintest:#55524C;  /* casi invisible */
     --accent:      #C6A15B;   /* acento dorado  (alternativa plata: #C8CCD2) */
+    --accent-bright:#D8BC7E;  /* dorado más claro, para la burbuja de precio */
     --accent-ink:  #100E08;   /* texto sobre el acento */
     --card-a:      #17150F;    /* franja clara del placeholder */
     --card-b:      #131109;    /* franja oscura del placeholder */
@@ -92,9 +93,15 @@
   }
   .nav { display: flex; gap: 20px; align-items: center;
     font-size: 12px; letter-spacing: 0.04em; }
-  .nav a { text-decoration: none; color: var(--text-soft); transition: color .2s; }
-  .nav a.wa { color: var(--accent); }
+  /* padding+margin negativo = zona táctil más grande sin mover el texto visualmente */
+  .nav a { text-decoration: none; color: var(--text-soft); transition: color .2s, opacity .2s;
+    padding: 12px 8px; margin: -12px -8px; border-radius: 999px; }
+  .nav a.wa {
+    color: var(--accent-ink); background: var(--accent); font-weight: 500;
+    padding: 10px 14px; margin: -10px 0;
+  }
   .nav a:hover { color: var(--text); }
+  .nav a.wa:hover { color: var(--accent-ink); opacity: 0.88; }
 
   /* ---------- Hero ---------- */
   .hero { max-width: var(--maxw); margin: 0 auto; padding: 84px 22px 96px; text-align: center; }
@@ -117,7 +124,7 @@
     max-width: 440px; margin: 0 auto; font-size: 15px; line-height: 1.9;
     letter-spacing: 0.04em; color: var(--text-soft);
   }
-  .hero-cta { margin-top: 34px; }
+  .hero-cta { margin-top: 34px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
   /* ---------- Cómo comprar ---------- */
   .how-to-buy {
@@ -163,14 +170,26 @@
   }
   .card:hover .thumb { border-color: rgba(198,161,91,0.35); transform: translateY(-2px); }
   .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .thumb .corner { position: absolute; top: 12px; left: 12px; width: 16px; height: 16px; object-fit: contain; opacity: 0.7; }
+  .thumb .corner { position: absolute; top: 12px; left: 12px; width: 16px; height: 16px; object-fit: contain; opacity: 0.85; }
   .thumb .ghost { font-family: 'Cormorant Garamond', serif; font-size: 34px; color: rgba(237,233,226,0.10); }
   .thumb .slot {
     position: absolute; bottom: 12px; left: 0; right: 0; text-align: center;
     font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faintest);
   }
-  .card .name { padding: 12px 2px 4px; font-family: 'Cormorant Garamond', serif; font-size: 19px; letter-spacing: 0.02em; color: #E6E1D8; }
-  .card .materials { font-size: 11px; letter-spacing: 0.04em; color: var(--accent); margin-top: 2px; }
+  .card .name { padding: 12px 2px 4px; font-family: 'Cormorant Garamond', serif; font-size: 19px; letter-spacing: 0.02em; color: #E6E1D8;
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.3em; }
+  .card .materials { font-size: 11px; letter-spacing: 0.04em; color: var(--accent); margin-top: 2px;
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2em; }
+  .price-pill {
+    position: absolute; top: 12px; right: 12px; font-size: 11px; letter-spacing: 0.05em;
+    color: var(--accent-bright); background: rgba(11,10,9,.75);
+    border: 1px solid rgba(255,255,255,0.14); padding: 4px 10px; border-radius: 999px;
+  }
+  .variant-pill {
+    position: absolute; bottom: 12px; left: 12px; font-size: 10px; letter-spacing: 0.04em;
+    color: var(--text-soft); background: rgba(11,10,9,.75);
+    border: 1px solid rgba(255,255,255,0.14); padding: 3px 9px; border-radius: 999px;
+  }
 
   /* ---------- Divisor con estrella ---------- */
   .divider {
@@ -187,6 +206,7 @@
     margin: 0 0 8px; letter-spacing: 0.02em;
   }
   .portfolio-head p { font-size: 13px; letter-spacing: 0.05em; color: var(--text-soft); margin: 0; }
+  .portfolio-head p.portfolio-count { font-size: 11px; letter-spacing: 0.05em; color: var(--accent); margin: 0 0 8px; }
   .portfolio-head .wa-link {
     color: var(--accent); text-decoration: underline;
     text-decoration-color: rgba(198,161,91,0.4); text-underline-offset: 3px;
@@ -261,17 +281,19 @@
     font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-faintest);
   }
   .close {
-    position: absolute; top: 14px; right: 14px; appearance: none; border: none;
-    width: 36px; height: 36px; border-radius: 999px; background: rgba(16,14,11,0.7);
-    color: var(--text); font-size: 17px; cursor: pointer; line-height: 1;
+    position: absolute; top: 12px; right: 12px; appearance: none; border: none;
+    width: 44px; height: 44px; border-radius: 999px; background: rgba(16,14,11,0.7);
+    color: var(--text); font-size: 18px; cursor: pointer; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
   }
   .photo-nav {
     position: absolute; top: 50%; transform: translateY(-50%); appearance: none; border: none;
-    width: 38px; height: 38px; border-radius: 999px; background: rgba(16,14,11,0.7);
-    color: var(--text); font-size: 22px; cursor: pointer; line-height: 1;
+    width: 44px; height: 44px; border-radius: 999px; background: rgba(16,14,11,0.7);
+    color: var(--text); font-size: 24px; cursor: pointer; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
   }
-  .photo-nav.prev { left: 14px; }
-  .photo-nav.next { right: 14px; }
+  .photo-nav.prev { left: 10px; }
+  .photo-nav.next { right: 10px; }
   .photo-dots {
     position: absolute; bottom: 16px; left: 0; right: 0;
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -288,17 +310,29 @@
   .sheet-body h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 32px; margin: 0 0 6px; line-height: 1.05; letter-spacing: 0.02em; }
   .sheet-body .price { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #E6E1D8; margin-bottom: 18px; }
   .sheet-body .desc { font-size: 14.5px; line-height: 1.9; letter-spacing: 0.03em; color: var(--text-soft); margin: 0 0 8px; }
-  .sheet-body .materials { font-size: 12px; letter-spacing: 0.05em; color: var(--text-faint); margin: 0 0 26px; }
+  .sheet-body .materials { font-size: 12px; letter-spacing: 0.05em; color: var(--text-soft); margin: 0 0 26px; }
   .sheet-body .materials.is-sold { color: var(--text-soft); }
   .sheet-body .wa {
     text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-ink); font-size: 14px; letter-spacing: 0.1em;
     text-transform: uppercase; padding: 16px; border-radius: 12px;
   }
-  .sheet-body .note { text-align: center; font-size: 11px; letter-spacing: 0.05em; color: var(--text-faintest); margin: 14px 0 0; }
+  .sheet-body .note { text-align: center; font-size: 11px; letter-spacing: 0.05em; color: var(--text-dim); margin: 14px 0 0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
   /* Foco visible para accesibilidad */
   a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* ---------- Botón flotante de WhatsApp (solo mobile) ---------- */
+  .wa-float {
+    position: fixed; right: 16px; bottom: 16px; z-index: 45;
+    width: 56px; height: 56px; border-radius: 999px;
+    background: var(--accent); color: var(--accent-ink);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45); text-decoration: none;
+  }
+  @media (min-width: 641px) { .wa-float { display: none; } }
 
   /* ---------- Responsive ---------- */
   @media (max-width: 640px) {
@@ -308,8 +342,16 @@
     .topbar-inner { padding: 14px 16px; }
     .brand-mark { font-size: 15px; }
     .nav { gap: 10px; font-size: 9.5px; }
-    .how-to-buy { flex-direction: column; gap: 10px; padding-bottom: 56px; }
+    .how-to-buy { flex-direction: column; gap: 10px; padding-bottom: 32px; }
     #nav-ig { display: none; }
+
+    /* Subir piezas "sobre el pliegue": achicar hero y separaciones */
+    .hero { padding: 40px 22px 48px; }
+    .eyebrow { margin-bottom: 18px; }
+    .flourish { margin: 22px 0 18px; }
+    .hero-cta { margin-top: 22px; gap: 10px; }
+    .btn { padding: 12px 22px; font-size: 12px; }
+    .section-head { margin-bottom: 18px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -319,6 +361,7 @@
 </style>
 </head>
 <body>
+<div id="page">
 
   <!-- Barra superior -->
   <div class="topbar">
@@ -339,7 +382,10 @@
     <h1 class="serif">Paz Ausin<br><span class="italic">Joyas</span></h1>
     <div class="flourish"><span class="l"></span><span>✦</span><span class="r"></span></div>
     <p>Joyería fina hecha a mano · Piezas únicas<br>Plata 950 · Oro 18K · Piedras naturales</p>
-    <a href="#disponible" class="btn btn-ghost hero-cta">Ver piezas disponibles</a>
+    <div class="hero-cta">
+      <a id="hero-wa" class="btn btn-primary" href="#" target="_blank" rel="noopener">Escríbeme por WhatsApp</a>
+      <a href="#disponible" class="btn btn-ghost">Ver piezas disponibles</a>
+    </div>
   </section>
 
   <!-- Cómo comprar -->
@@ -371,7 +417,8 @@
   <section class="catalog" id="portafolio">
     <div class="portfolio-head">
       <h2 class="serif">Portafolio</h2>
-      <p>Trabajos realizados · ¿Quieres algo parecido? <a id="portfolio-wa" class="wa-link" href="#" target="_blank" rel="noopener">Escríbeme.</a></p>
+      <p class="portfolio-count" id="portfolio-count"></p>
+      <p>Trabajos realizados ·<br>¿Quieres algo parecido? <a id="portfolio-wa" class="wa-link" href="#" target="_blank" rel="noopener">Escríbeme.</a></p>
     </div>
     <div class="grid" id="grid-sold"></div>
   </section>
@@ -387,12 +434,23 @@
   <footer>
     <div class="fname serif">Paz Ausin Joyas</div>
     <div class="ftag">Hecho a mano en Chile</div>
-    <p class="footer-note">Entrega y pago se coordinan directo por WhatsApp</p>
+    <p class="footer-note">Entrega, pago y ajuste de talla se coordinan directo por WhatsApp</p>
     <div class="footer-actions">
       <a id="foot-wa" class="btn btn-primary" href="#" target="_blank" rel="noopener">Escribir por WhatsApp</a>
       <a id="foot-ig" class="btn btn-ghost" href="#" target="_blank" rel="noopener">@pazausin</a>
     </div>
   </footer>
+
+  <!-- Botón flotante de WhatsApp (solo mobile) -->
+  <a id="wa-float" class="wa-float" href="#" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3C7.03 3 3 6.94 3 11.8c0 1.87.58 3.6 1.58 5.03L3.5 21l4.32-1.13a9.3 9.3 0 0 0 4.18 1c4.97 0 9-3.94 9-8.8S16.97 3 12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M8.7 10.4c.3 2.4 2.4 4.4 4.8 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+  </a>
+
+</div>
+<!-- /#page -->
 
   <!-- Overlay de detalle (se llena por JS) -->
   <div class="overlay" id="overlay" hidden>
@@ -404,6 +462,7 @@
         <button class="photo-nav prev" id="sheet-prev" aria-label="Foto anterior" hidden>‹</button>
         <button class="photo-nav next" id="sheet-next" aria-label="Foto siguiente" hidden>›</button>
         <div class="photo-dots" id="sheet-dots" hidden></div>
+        <span class="sr-only" id="sheet-photo-status" aria-live="polite"></span>
         <button class="close" id="sheet-close" aria-label="Cerrar">✕</button>
       </div>
       <div class="sheet-body">
@@ -441,23 +500,23 @@ const CONFIG = {
    (anillo-sello-plata-01.jpg), lado mayor máx. 1600px, peso ideal <400 KB.
    ================================================================ */
 const AVAILABLE = [
-  { name: 'Anillo Sello',            slot: 'anillo', talla: '15', price: 'Por confirmar', materials: 'Plata 950 · Diamante negro',
+  { name: 'Anillo Sello',            slot: 'anillo', talla: '15', price: 115000, materials: 'Plata 950 · Diamante negro',
     imgs: ['fotos/anillo-sello-01.jpg','fotos/anillo-sello-02.jpg','fotos/anillo-sello-03.jpg','fotos/anillo-sello-04.jpg','fotos/anillo-sello-05.jpg','fotos/anillo-sello-06.jpg','fotos/anillo-sello-07.jpg'] },
-  { name: 'Anillo Micropavé',        slot: 'anillo', talla: '13', price: 'Por confirmar', materials: 'Plata 950 · Espinelas negras · Baño rodio negro',
+  { name: 'Anillo Micropavé',        slot: 'anillo', talla: '13', price: 240000, materials: 'Plata 950 · Espinelas negras · Baño rodio negro',
     imgs: ['fotos/anillo-micropave-01.jpg','fotos/anillo-micropave-02.jpg','fotos/anillo-micropave-03.jpg','fotos/anillo-micropave-04.jpg','fotos/anillo-micropave-05.jpg'] },
-  { name: 'Anillo Aguamarina',       slot: 'anillo', talla: '13', price: 'Por confirmar', materials: 'Oro 18K · Aguamarina',
+  { name: 'Anillo Aguamarina',       slot: 'anillo', talla: '13', price: 900000, materials: 'Oro 18K · Aguamarina',
     imgs: ['fotos/anillo-aguamarina-01.jpg','fotos/anillo-aguamarina-02.jpg','fotos/anillo-aguamarina-03.jpg','fotos/anillo-aguamarina-04.jpg','fotos/anillo-aguamarina-05.jpg','fotos/anillo-aguamarina-06.jpg'] },
-  { name: 'Aros Zafiros Blancos',    slot: 'aros',   price: 'Por confirmar', materials: 'Plata 950 · Zafiros blancos',
+  { name: 'Aros Zafiros Blancos',    slot: 'aros',   price: 45000, materials: 'Plata 950 · Zafiros blancos',
     imgs: ['fotos/aros-zafiros-blancos-01.jpg','fotos/aros-zafiros-blancos-02.jpg','fotos/aros-zafiros-blancos-03.jpg','fotos/aros-zafiros-blancos-04.jpg','fotos/aros-zafiros-blancos-05.jpg'] },
-  { name: 'Anillo Rubí',             slot: 'anillo', talla: '11', price: 'Por confirmar', materials: 'Plata 950 · Rubí sintético',
+  { name: 'Anillo Rubí',             slot: 'anillo', talla: '11', price: 150000, materials: 'Plata 950 · Rubí de laboratorio',
     imgs: ['fotos/anillo-rubi-01.jpg','fotos/anillo-rubi-02.jpg'] },
-  { name: 'Aros Zafiros y Diamantes',slot: 'aros',   price: 'Por confirmar', materials: 'Oro 18K · Zafiros · Diamantes',
+  { name: 'Aros Zafiros y Diamantes',slot: 'aros',   price: 1500000, materials: 'Oro 18K · Zafiros · Diamantes',
     imgs: ['fotos/aros-zafiros-y-diamantes-01.jpg','fotos/aros-zafiros-y-diamantes-02.jpg'] },
-  { name: 'Anillo Plata',            slot: 'anillo', talla: '15', price: 'Por confirmar', materials: 'Plata 950',
+  { name: 'Anillo Plata',            slot: 'anillo', talla: '15', price: 120000, materials: 'Plata 950',
     imgs: ['fotos/anillo-plata-01.jpg','fotos/anillo-plata-02.jpg','fotos/anillo-plata-03.jpg','fotos/anillo-plata-04.jpg'] },
-  { name: 'Anillo Aguamarina Gota',  slot: 'anillo', talla: '16', price: 'Por confirmar', materials: 'Oro 18K · Aguamarina · Topacios blancos',
+  { name: 'Anillo Aguamarina Gota',  slot: 'anillo', talla: '16', price: 1500000, materials: 'Oro 18K · Aguamarina · Topacios blancos',
     imgs: ['fotos/anillo-aguamarina-gota-01.jpg','fotos/anillo-aguamarina-gota-02.jpg','fotos/anillo-aguamarina-gota-03.jpg','fotos/anillo-aguamarina-gota-04.jpg'] },
-  { name: 'Anillos Cuarzos',         slot: 'anillo', price: 'Por confirmar', materials: 'Plata 950 · Cuarzo turmalinado · Cuarzo rosa · Baño de oro',
+  { name: 'Anillos Cuarzos',         slot: 'anillo', price: 110000, priceSuffix: 'c/u', variantsNote: '3 diseños', materials: 'Plata 950 · Cuarzo turmalinado · Cuarzo rosa · Baño de oro',
     desc: 'Tres anillos con distinto cuarzo — turmalinado con baño de oro, turmalinado en plata y rosa. Se venden por separado, mismo precio c/u. Escríbeme cuál te gusta.',
     imgs: ['fotos/anillos-cuarzos-01.jpg','fotos/anillos-cuarzos-02.jpg'] },
 ];
@@ -517,6 +576,13 @@ const SOLD = [
    ================================================================ */
 const waLink = (text) => 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent(text);
 
+// Formatea un número a CLP con separador de miles chileno (punto): formatCLP(115000) => '$115.000'
+const formatCLP = (amount) => '$' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+// Etiqueta de precio de una pieza (null si el precio aún no es numérico, ej. 'Por confirmar')
+const priceLabel = (item) => typeof item.price === 'number'
+  ? formatCLP(item.price) + (item.priceSuffix ? ' ' + item.priceSuffix : '')
+  : null;
+
 // Acepta `img: 'a.jpg'` (una foto) o `imgs: ['a.jpg', 'b.jpg']` (varias)
 const photosOf = (item) => item.imgs && item.imgs.length ? item.imgs : (item.img ? [item.img] : []);
 const firstImg = (item) => photosOf(item)[0];
@@ -529,18 +595,24 @@ document.getElementById('nav-ig').href   = CONFIG.instagram;
 document.getElementById('foot-ig').href  = CONFIG.instagram;
 document.getElementById('nav-wa').href   = waGeneral;
 document.getElementById('foot-wa').href  = waGeneral;
+document.getElementById('hero-wa').href  = waGeneral;
+document.getElementById('wa-float').href = waGeneral;
 document.getElementById('portfolio-wa').href = waLink('Hola! Vi el portafolio y me gustaría encargar una pieza personalizada');
+document.getElementById('portfolio-count').textContent = SOLD.length + ' piezas entregadas';
 
 // Dibuja una tarjeta disponible
 function cardAvailable(item, index) {
   const btn = document.createElement('button');
   btn.className = 'card';
   const thumb = thumbSrc(item);
+  const price = priceLabel(item);
   btn.innerHTML = `
     <div class="thumb">
       <img class="corner" src="fotos/paz-ausin-estrella-favicon.png" alt="" loading="lazy" decoding="async">
       ${thumb ? `<img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
       ${!thumb ? `<span class="slot">foto · ${item.slot}</span>` : ''}
+      ${price ? `<span class="price-pill">${price}</span>` : ''}
+      ${item.variantsNote ? `<span class="variant-pill">${item.variantsNote}</span>` : ''}
     </div>
     <div class="name">${item.name}</div>
     <div class="materials">${item.materials}</div>`;
@@ -580,6 +652,7 @@ SOLD.forEach(it => gridS.appendChild(cardSold(it)));
 
 // ---- Overlay de detalle ----
 const overlay = document.getElementById('overlay');
+const pageEl = document.getElementById('page');
 const els = {
   photoWrap: document.getElementById('sheet-photo'),
   ghost: document.getElementById('sheet-ghost'),
@@ -588,6 +661,7 @@ const els = {
   prev: document.getElementById('sheet-prev'),
   next: document.getElementById('sheet-next'),
   dots: document.getElementById('sheet-dots'),
+  photoStatus: document.getElementById('sheet-photo-status'),
   status: document.getElementById('sheet-status'),
   name: document.getElementById('sheet-name'),
   price: document.getElementById('sheet-price'),
@@ -612,8 +686,9 @@ function isAtEnd() { return currentPhotoIndex === currentPhotos.length - 1; }
 // así que al abrir el overlay la siguiente/anterior ya están listas: no
 // hay salto en blanco al deslizar.
 function buildTrack() {
-  els.track.innerHTML = currentPhotos.map((src) =>
-    `<img class="slide" src="${src}" alt="${currentPhotoName}" loading="eager" decoding="async">`
+  const total = currentPhotos.length;
+  els.track.innerHTML = currentPhotos.map((src, i) =>
+    `<img class="slide" src="${src}" alt="${currentPhotoName} — foto ${i + 1} de ${total}" loading="eager" decoding="async">`
   ).join('');
 }
 
@@ -642,6 +717,7 @@ function goToIndex(index, animate) {
   els.track.style.transition = animate ? 'transform 220ms ease-out' : '';
   els.track.style.transform = 'translateX(-' + (currentPhotoIndex * 100) + '%)';
   updateDots();
+  if (multiPhoto()) els.photoStatus.textContent = 'Foto ' + (currentPhotoIndex + 1) + ' de ' + currentPhotos.length;
 }
 
 function stepPhoto(dir) {
@@ -772,27 +848,34 @@ function openDetail(item, isSold) {
     els.materials.textContent = item.materials;
     els.wa.textContent = 'Encargar una pieza similar';
     els.wa.href = waLink('Hola! Me gustó el ' + item.name + ' del portafolio. ¿Podrías hacer algo parecido?');
+    els.note.hidden = false;
     els.note.textContent = 'Cada pieza es única — se puede crear una versión nueva inspirada en esta.';
   } else {
+    const price = priceLabel(item);
     els.status.textContent = 'Disponible';
     els.status.classList.remove('is-sold');
-    els.price.hidden = false; els.price.textContent = item.price;
+    els.price.hidden = false; els.price.textContent = price || item.price;
     els.desc.hidden = !item.desc; if (item.desc) els.desc.textContent = item.desc;
     els.materials.hidden = false;
     els.materials.classList.remove('is-sold');
     els.materials.textContent = item.materials + (item.talla ? ' · Talla ' + item.talla : '');
     els.wa.textContent = 'Consultar por WhatsApp';
     els.wa.href = waLink('Hola! Me interesa el ' + item.name + ' que vi en la página');
-    els.note.textContent = 'Precio referencial · por confirmar';
+    els.note.hidden = false;
+    els.note.textContent = price
+      ? 'Pieza única — una vez vendida, no se repite.'
+      : 'Precio referencial · por confirmar';
   }
 
   overlay.hidden = false;
+  pageEl.inert = true;
   document.body.style.overflow = 'hidden';
   document.getElementById('sheet-close').focus();
 }
 
 function closeDetail() {
   overlay.hidden = true;
+  pageEl.inert = false;
   document.body.style.overflow = '';
 }
 
