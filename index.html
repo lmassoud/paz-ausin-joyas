@@ -6,12 +6,24 @@
 <title>Paz Ausin Joyas · Orfebrería hecha a mano</title>
 <meta name="description" content="Joyería fina hecha a mano. Piezas únicas en Plata 950, Oro 18K y piedras naturales. Hecho a mano en Chile.">
 
-<!-- Meta tags para compartir por WhatsApp / Instagram -->
+<!-- Meta tags para compartir por WhatsApp / Instagram.
+     OJO: og:image y og:url TIENEN que ser direcciones completas (https://...).
+     WhatsApp y Facebook no leen rutas relativas: con "fotos/og.jpg" el enlace se
+     compartía sin foto de vista previa. Al pasar a dominio propio, cambiar las
+     tres líneas de abajo y el <link rel="canonical">. -->
 <meta property="og:title" content="Paz Ausin Joyas · Orfebrería hecha a mano">
 <meta property="og:description" content="Piezas únicas en Plata 950, Oro 18K y piedras naturales. Hecho a mano en Chile.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="fotos/og.jpg"> <!-- TODO: crear con foto real -->
+<meta property="og:site_name" content="Paz Ausin Joyas">
+<meta property="og:locale" content="es_CL">
+<meta property="og:url" content="https://lmassoud.github.io/paz-ausin-joyas/">
+<meta property="og:image" content="https://lmassoud.github.io/paz-ausin-joyas/fotos/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Joyas hechas a mano por Paz Ausin">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lmassoud.github.io/paz-ausin-joyas/fotos/og.jpg">
+<link rel="canonical" href="https://lmassoud.github.io/paz-ausin-joyas/">
 
 <meta name="theme-color" content="#0B0A09">
 
@@ -24,6 +36,10 @@
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Paz Ausin Joyas",
+  "description": "Joyería fina hecha a mano en Chile. Piezas únicas en Plata 950, Oro 18K y piedras naturales.",
+  "url": "https://lmassoud.github.io/paz-ausin-joyas/",
+  "logo": "https://lmassoud.github.io/paz-ausin-joyas/fotos/paz-ausin-estrella-favicon.png",
+  "areaServed": "CL",
   "sameAs": ["https://instagram.com/pazausin"]
 }
 </script>
@@ -58,7 +74,18 @@
 
   * { box-sizing: border-box; }
 
+  /* El atributo hidden del HTML lo pone el navegador con `display:none`, pero
+     cualquier regla nuestra que fije `display` le gana (una regla de autor
+     siempre vence a la del navegador). Por eso las flechas ‹ › del overlay
+     —que son `display:flex`— seguían viéndose aunque el JS las marcara hidden.
+     Esta línea hace que hidden signifique oculto siempre. */
+  [hidden] { display: none !important; }
+
   html { scroll-behavior: smooth; }
+
+  /* La barra superior es fija: sin este margen, al tocar "Piezas" o "Portafolio"
+     el título de la sección quedaba justo debajo de la barra, invisible. */
+  #disponible, #portafolio { scroll-margin-top: 76px; }
 
   body {
     margin: 0;
@@ -80,6 +107,7 @@
   .topbar {
     position: sticky; top: 0; z-index: 40;
     background: rgba(11,10,9,0.85);
+    -webkit-backdrop-filter: blur(10px);   /* Safari de iPhone anterior al 18 */
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line-soft);
   }
@@ -153,14 +181,18 @@
   }
 
   .empty-state { text-align: center; padding: 60px 20px; }
-  .empty-state[hidden] { display: none; }
   .empty-state p {
     font-size: 15px; letter-spacing: 0.02em; color: var(--text-soft); margin: 0 0 26px;
   }
 
   /* Tarjeta de pieza (disponible) */
   .card { appearance: none; border: none; background: transparent; padding: 0;
-    text-align: left; cursor: pointer; font-family: inherit; color: inherit; }
+    text-align: left; cursor: pointer; font-family: inherit; color: inherit;
+    /* Un <button> centra su contenido a lo alto, y como la grilla estira las dos
+       tarjetas de una fila a la misma altura, la que tenía el texto más corto
+       bajaba su foto unos píxeles: las fotos de una misma fila no calzaban.
+       En columna flexible el contenido arranca arriba y todas quedan a ras. */
+    display: flex; flex-direction: column; align-items: stretch; }
   .thumb {
     position: relative; aspect-ratio: 4/5; overflow: hidden;
     background: repeating-linear-gradient(135deg, var(--card-a) 0 11px, var(--card-b) 11px 22px);
@@ -170,7 +202,11 @@
   }
   .card:hover .thumb { border-color: rgba(198,161,91,0.35); transform: translateY(-2px); }
   .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .thumb .corner { position: absolute; top: 12px; left: 12px; width: 16px; height: 16px; object-fit: contain; opacity: 0.85; }
+  /* La estrella va sobre la foto: sin z-index quedaba debajo (la foto se dibuja
+     después porque va después en el HTML) y no se veía nunca. */
+  .thumb .corner { position: absolute; z-index: 1; top: 10px; left: 10px;
+    width: 15px; height: 15px; object-fit: contain; opacity: 0.6;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)); }
   .thumb .ghost { font-family: 'Cormorant Garamond', serif; font-size: 34px; color: rgba(237,233,226,0.10); }
   .thumb .slot {
     position: absolute; bottom: 12px; left: 0; right: 0; text-align: center;
@@ -251,11 +287,14 @@
   /* ---------- Overlay de detalle ---------- */
   .overlay {
     position: fixed; inset: 0; z-index: 50; background: rgba(6,5,4,0.82);
+    -webkit-backdrop-filter: blur(6px);   /* Safari de iPhone anterior al 18 */
     backdrop-filter: blur(6px); display: flex; align-items: flex-end; justify-content: center;
   }
-  .overlay[hidden] { display: none; }
   .sheet {
-    width: 100%; max-width: 560px; max-height: 94vh; overflow-y: auto;
+    width: 100%; max-width: 560px; overflow-y: auto;
+    /* dvh = alto real visible en el celular. Con vh, la barra de direcciones de
+       Safari se descuenta mal y el botón de WhatsApp quedaba fuera de pantalla. */
+    max-height: 94vh; max-height: 94dvh;
     background: #100E0B; border: 1px solid rgba(255,255,255,0.08); border-bottom: none;
     border-radius: 20px 20px 0 0;
     animation: rise .28s ease;
@@ -294,6 +333,10 @@
   }
   .photo-nav.prev { left: 10px; }
   .photo-nav.next { right: 10px; }
+  /* En la primera y la última foto la flecha se apaga, igual que el
+     deslizamiento, que tampoco da la vuelta. Antes las flechas sí daban la
+     vuelta y el gesto no: dos comportamientos distintos para lo mismo. */
+  .photo-nav:disabled { opacity: 0.25; cursor: default; }
   .photo-dots {
     position: absolute; bottom: 16px; left: 0; right: 0;
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -403,6 +446,15 @@
       <h2 class="serif">Disponible ahora</h2>
       <span class="hint">Toca una pieza</span>
     </div>
+    <!-- El catálogo lo dibuja el JS. Si el navegador lo tiene apagado, al menos
+         que quede un camino a WhatsApp en vez de una página vacía. -->
+    <noscript>
+      <div class="empty-state">
+        <p>Para ver el catálogo necesitas activar JavaScript.<br>
+           Si prefieres, escríbeme y te mando las fotos por WhatsApp.</p>
+        <a class="btn btn-primary" href="https://wa.me/56998179246">Escríbeme por WhatsApp</a>
+      </div>
+    </noscript>
     <div class="grid" id="grid-available"></div>
     <div class="empty-state" id="empty-available" hidden>
       <p>Las piezas disponibles vuelan ✦ Hay nuevas en camino.</p>
@@ -576,6 +628,13 @@ const SOLD = [
    ================================================================ */
 const waLink = (text) => 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent(text);
 
+// Los textos de las piezas se insertan como HTML, así que hay que escaparlos.
+// Sin esto, un nombre con & o con comillas (p.ej. «Aros "Estrella"») rompía la
+// tarjeta o cortaba el texto alternativo de la foto.
+const escapar = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+));
+
 // Formatea un número a CLP con separador de miles chileno (punto): formatCLP(115000) => '$115.000'
 const formatCLP = (amount) => '$' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 // Etiqueta de precio de una pieza (null si el precio aún no es numérico, ej. 'Por confirmar')
@@ -597,26 +656,31 @@ document.getElementById('nav-wa').href   = waGeneral;
 document.getElementById('foot-wa').href  = waGeneral;
 document.getElementById('hero-wa').href  = waGeneral;
 document.getElementById('wa-float').href = waGeneral;
+// el del overlay se reescribe con el nombre de la pieza al abrirla; este es solo
+// el valor inicial, para que nunca quede apuntando a "#"
+document.getElementById('sheet-wa').href = waGeneral;
 document.getElementById('portfolio-wa').href = waLink('Hola! Vi el portafolio y me gustaría encargar una pieza personalizada');
-document.getElementById('portfolio-count').textContent = SOLD.length + ' piezas entregadas';
+document.getElementById('portfolio-count').textContent =
+  SOLD.length === 1 ? '1 pieza entregada' : SOLD.length + ' piezas entregadas';
 
 // Dibuja una tarjeta disponible
-function cardAvailable(item, index) {
+function cardAvailable(item) {
   const btn = document.createElement('button');
   btn.className = 'card';
   const thumb = thumbSrc(item);
   const price = priceLabel(item);
+  const nombre = escapar(item.name);
   btn.innerHTML = `
     <div class="thumb">
       <img class="corner" src="fotos/paz-ausin-estrella-favicon.png" alt="" loading="lazy" decoding="async">
-      ${thumb ? `<img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
-      ${!thumb ? `<span class="slot">foto · ${item.slot}</span>` : ''}
-      ${price ? `<span class="price-pill">${price}</span>` : ''}
-      ${item.variantsNote ? `<span class="variant-pill">${item.variantsNote}</span>` : ''}
+      ${thumb ? `<img src="${escapar(thumb)}" alt="${nombre}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
+      ${!thumb ? `<span class="slot">foto · ${escapar(item.slot)}</span>` : ''}
+      ${price ? `<span class="price-pill">${escapar(price)}</span>` : ''}
+      ${item.variantsNote ? `<span class="variant-pill">${escapar(item.variantsNote)}</span>` : ''}
     </div>
-    <div class="name">${item.name}</div>
-    <div class="materials">${item.materials}</div>`;
-  btn.addEventListener('click', () => openDetail(item));
+    <div class="name">${nombre}</div>
+    <div class="materials">${escapar(item.materials)}</div>`;
+  btn.addEventListener('click', () => openDetail(item, false, btn));
   return btn;
 }
 
@@ -625,15 +689,16 @@ function cardSold(item) {
   const btn = document.createElement('button');
   btn.className = 'card sold';
   const thumb = thumbSrc(item);
+  const nombre = escapar(item.name);
   btn.innerHTML = `
     <div class="thumb">
-      ${thumb ? `<img src="${thumb}" alt="${item.name}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
+      ${thumb ? `<img src="${escapar(thumb)}" alt="${nombre}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
       <span class="badge">Vendido</span>
-      ${!thumb ? `<span class="slot">foto · ${item.slot}</span>` : ''}
+      ${!thumb ? `<span class="slot">foto · ${escapar(item.slot)}</span>` : ''}
     </div>
-    <div class="name">${item.name}</div>
-    <div class="materials">${item.materials}</div>`;
-  btn.addEventListener('click', () => openDetail(item, true));
+    <div class="name">${nombre}</div>
+    <div class="materials">${escapar(item.materials)}</div>`;
+  btn.addEventListener('click', () => openDetail(item, true, btn));
   return btn;
 }
 
@@ -641,14 +706,27 @@ const gridA = document.getElementById('grid-available');
 const gridS = document.getElementById('grid-sold');
 const emptyAvailable = document.getElementById('empty-available');
 
+// se deja listo siempre, aunque el bloque esté oculto: así nunca queda un
+// enlace apuntando a "#" si el catálogo se vacía
+document.getElementById('empty-wa').href = waLink('Hola! Quiero que me avises cuando haya piezas nuevas disponibles');
+
 if (AVAILABLE.length === 0) {
   gridA.hidden = true;
   emptyAvailable.hidden = false;
-  document.getElementById('empty-wa').href = waLink('Hola! Quiero que me avises cuando haya piezas nuevas disponibles');
 } else {
-  AVAILABLE.forEach((it, i) => gridA.appendChild(cardAvailable(it, i)));
+  AVAILABLE.forEach(it => gridA.appendChild(cardAvailable(it)));
 }
 SOLD.forEach(it => gridS.appendChild(cardSold(it)));
+
+// Si alguien abre un enlace con ancla (.../#portafolio, que es el que se manda
+// por WhatsApp), el navegador salta ANTES de que este script dibuje las piezas.
+// Al aparecer la grilla de arriba, la sección se corre varios miles de píxeles
+// y el visitante queda en cualquier parte. Por eso se repite el salto ya dibujado.
+const anclaInicial = decodeURIComponent(location.hash.slice(1));
+if (anclaInicial) {
+  const destino = document.getElementById(anclaInicial);
+  if (destino) destino.scrollIntoView({ behavior: 'instant', block: 'start' });
+}
 
 // ---- Overlay de detalle ----
 const overlay = document.getElementById('overlay');
@@ -677,19 +755,36 @@ let currentPhotos = [];
 let currentPhotoIndex = 0;
 let currentPhotoName = '';
 let dragState = null;
+let ultimaTarjeta = null;   // la tarjeta desde la que se abrió el overlay
 
 function multiPhoto() { return currentPhotos.length > 1; }
 function isAtStart() { return currentPhotoIndex === 0; }
 function isAtEnd() { return currentPhotoIndex === currentPhotos.length - 1; }
 
-// Todas las fotos de la pieza se cargan de una (no son muchas por pieza),
-// así que al abrir el overlay la siguiente/anterior ya están listas: no
-// hay salto en blanco al deslizar.
+// Al abrir se cargan solo las dos primeras fotos, y el resto se va trayendo a
+// medida que el visitante avanza (siempre una foto por delante y otra por
+// detrás). Antes se cargaban todas de golpe: abrir una pieza de 7 fotos pedía
+// ~1 MB de una, y casi todo el tráfico llega de Instagram con datos móviles.
+// Igual no hay salto en blanco al deslizar, porque la vecina ya viene lista.
+const VECINAS_PRECARGADAS = 1;
+
 function buildTrack() {
   const total = currentPhotos.length;
   els.track.innerHTML = currentPhotos.map((src, i) =>
-    `<img class="slide" src="${src}" alt="${currentPhotoName} — foto ${i + 1} de ${total}" loading="eager" decoding="async">`
+    `<img class="slide" alt="${escapar(currentPhotoName)} — foto ${i + 1} de ${total}"
+          data-src="${escapar(src)}" decoding="async">`
   ).join('');
+  precargarVecinas();
+}
+
+// Le pone src a las fotos cercanas a la actual; las lejanas siguen sin pedirse.
+function precargarVecinas() {
+  const slides = els.track.children;
+  for (let i = 0; i < slides.length; i++) {
+    if (Math.abs(i - currentPhotoIndex) > VECINAS_PRECARGADAS) continue;
+    const img = slides[i];
+    if (!img.getAttribute('src') && img.dataset.src) img.src = img.dataset.src;
+  }
 }
 
 function updateDots() {
@@ -710,6 +805,14 @@ function updateGalleryChrome() {
   els.prev.hidden = !multiPhoto();
   els.next.hidden = !multiPhoto();
   updateDots();
+  updateNav();
+}
+
+// La flecha se apaga en el extremo, igual que el deslizamiento: ninguno de los
+// dos da la vuelta.
+function updateNav() {
+  els.prev.disabled = isAtStart();
+  els.next.disabled = isAtEnd();
 }
 
 function goToIndex(index, animate) {
@@ -717,12 +820,13 @@ function goToIndex(index, animate) {
   els.track.style.transition = animate ? 'transform 220ms ease-out' : '';
   els.track.style.transform = 'translateX(-' + (currentPhotoIndex * 100) + '%)';
   updateDots();
+  updateNav();
+  precargarVecinas();
   if (multiPhoto()) els.photoStatus.textContent = 'Foto ' + (currentPhotoIndex + 1) + ' de ' + currentPhotos.length;
 }
 
 function stepPhoto(dir) {
-  const len = currentPhotos.length;
-  goToIndex((currentPhotoIndex + dir + len) % len, true);
+  goToIndex(currentPhotoIndex + dir, true);
 }
 
 els.prev.addEventListener('click', (e) => { e.stopPropagation(); stepPhoto(-1); });
@@ -827,7 +931,8 @@ els.track.addEventListener('pointermove', onPhotoPointerMove, { passive: false }
 els.track.addEventListener('pointerup', onPhotoPointerUp);
 els.track.addEventListener('pointercancel', onPhotoPointerCancel);
 
-function openDetail(item, isSold) {
+function openDetail(item, isSold, origen) {
+  ultimaTarjeta = origen || null;
   els.name.textContent = item.name;
   els.slot.textContent = 'foto · ' + item.slot;
   currentPhotos = photosOf(item);
@@ -854,7 +959,10 @@ function openDetail(item, isSold) {
     const price = priceLabel(item);
     els.status.textContent = 'Disponible';
     els.status.classList.remove('is-sold');
-    els.price.hidden = false; els.price.textContent = price || item.price;
+    // si el precio todavía no es un número (ej. 'Por confirmar'), se muestra tal
+    // cual; si no hay nada, no se muestra una línea vacía ni la palabra undefined
+    els.price.hidden = !(price || item.price);
+    els.price.textContent = price || item.price || '';
     els.desc.hidden = !item.desc; if (item.desc) els.desc.textContent = item.desc;
     els.materials.hidden = false;
     els.materials.classList.remove('is-sold');
@@ -877,6 +985,11 @@ function closeDetail() {
   overlay.hidden = true;
   pageEl.inert = false;
   document.body.style.overflow = '';
+  // Devolver el foco a la pieza desde la que se abrió. Sin esto quedaba en el
+  // botón de cerrar —ya oculto—, y quien navega con teclado perdía el lugar en
+  // la grilla y volvía a empezar desde arriba de la página.
+  if (ultimaTarjeta && document.contains(ultimaTarjeta)) ultimaTarjeta.focus();
+  ultimaTarjeta = null;
 }
 
 document.getElementById('sheet-close').addEventListener('click', closeDetail);

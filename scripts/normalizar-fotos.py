@@ -1,209 +1,377 @@
 #!/usr/bin/env python3
 """
-Normaliza el encuadre de las fotos del catalogo: la joya queda centrada y a un
-tamano parecido en todas, para que la grilla se vea ordenada.
+Normaliza el encuadre de las fotos del catalogo: la joya queda centrada y
+SIEMPRE del mismo porte, para que la grilla se vea pareja.
 
-REGLA PRINCIPAL: acercar cuando sobra fondo, NUNCA inventar fondo para alejar.
-(La v1 hacia lo contrario y generaba manchones de borde estirado.)
+Referencia de tamano: la portada de la Pulsera Grumet (fotos/pulsera-grumet-01.jpg),
+donde la pieza ocupa el 71,5% del ancho del cuadro. Ese es el valor de OBJETIVO.
 
 Por foto:
-  1. Detecta la joya por energia de bordes (la pieza tiene detalle, el fondo de
-     estudio no).
-  2. Calcula un recorte 4:5 centrado en la joya. Si la foto tiene fondo de
-     sobra, acerca hasta TARGET_FILL. Si no lo tiene, se queda con lo que hay:
-     nunca agranda el cuadro solo para que la joya se vea mas chica.
-  3. Solo cuando la joya no cabe en 4:5 (fotos apaisadas) agrega fondo, y lo
-     hace con un degradado suave sacado de la propia foto, con transicion
-     difuminada. Nada de replicar el borde: eso era lo que rayaba la imagen.
-  4. Guarda foto grande en fotos/ y miniatura en fotos/thumbs/.
+  1. Detecta la joya (scripts/detector_joya.py — por rango dinamico local, no por
+     gradiente: ver ahi el porque).
+  2. Calcula el recorte 4:5 que deja la pieza centrada y ocupando OBJETIVO de la
+     caja. La dimension que manda es la que "toca" primero: una pulsera ancha
+     toca los costados, un anillo alto toca arriba y abajo.
+  3. Si para alejarse hace falta salir de la foto, EXTIENDE el fondo: ajusta una
+     superficie suave al fondo real de esa misma foto y la continua hacia afuera,
+     con el mismo grano. No replica el borde (eso rayaba la imagen en la v4) ni
+     estira una version desenfocada (v5, que dejaba manchones).
+  4. Nunca extiende mas de MAX_RELLENO: pasado ese punto se queda con lo que hay
+     y la pieza sale un poco mas grande, que es preferible a inventar medio cuadro.
+  5. Guarda foto grande en fotos/ y miniatura en fotos/thumbs/.
 
 Uso:
     python3 scripts/normalizar-fotos.py --dry-run   # solo reporta
     python3 scripts/normalizar-fotos.py             # aplica
+    python3 scripts/normalizar-fotos.py --solo anillo-sello-01.jpg
 
 Los originales quedan respaldados en fotos/_originales/ y SIEMPRE se reprocesa
 desde ahi, asi que correrlo varias veces no degrada nada.
 """
 
-import sys, shutil
+import sys
+import shutil
 from pathlib import Path
+
 import numpy as np
 from PIL import Image, ImageFilter
-from scipy.ndimage import gaussian_filter, sobel, binary_closing, binary_opening, label
+from scipy.ndimage import binary_dilation, gaussian_filter, zoom
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from detector_joya import detectar, sin_borde_malo
 
 # ---------------------------------------------------------------- parametros
-TARGET_FILL  = 0.78   # cuanto ocupa la joya cuando hay fondo de sobra
-MAX_FILL     = 0.92   # nunca dejar que la joya toque el borde
-OUT_ASPECT   = 4/5
+OBJETIVO      = 0.715  # cuanto ocupa la pieza en la caja 4:5 (= pulsera-grumet-01)
+MAX_FILL      = 0.92   # tope: nunca dejar que la pieza toque el borde
+MAX_RELLENO   = 0.26   # tope de fondo agregado (suma de los dos ejes)
+OUT_ASPECT    = 4 / 5
 FULL_LONGSIDE, THUMB_LONGSIDE = 1600, 640
 FULL_Q, THUMB_Q = 86, 78
-EXCLUIR = {'og.jpg'}  # no son fotos de producto (og.jpg es la vista previa 1200x630)
+MAX_AGRANDE   = 2.0    # tope para agrandar una foto que quedo chica al recortar
+EXCLUIR = {'og.jpg'}   # og.jpg es la vista previa 1200x630, no es foto de producto
 
-# defensas del detector (heredadas de la correccion sobre v1):
-BORDE_MALO_MAX_PX = 8     # franjas de color saturado pegadas al borde (defecto de exportacion)
-BORDE_MALO_SAT    = 25    # saturacion media minima para considerar mala una franja
-BORDE_COMP_MARGEN = 0.03  # componentes 100% dentro de este margen de UN borde se descartan
+# Si la caja completa no es mucho mayor que el nucleo, es que no hay cadena y
+# conviene exigir que la pieza entera quepa. Si es mucho mayor, hay cadena y se
+# la deja salir del cuadro a proposito.
+FACTOR_CADENA = 1.6
+
+# Cajas puestas a mano, en fracciones del cuadro (x0, y0, x1, y1). Son las fotos
+# donde el detector automatico se equivoca; en vez de aflojar los umbrales para
+# todas —lo que empeora las 148 que estan bien— se le dice donde esta la pieza
+# solo en estas. Medidas sobre el original, despues de sin_borde_malo().
+CAJAS_A_MANO = {
+    # El primer plano de la mesa esta enfocado y tiene tanta textura como el
+    # metal: el detector lo sumaba al anillo y la pieza salia al 35%.
+    'anillo-sello-01.jpg':      (0.36, 0.37, 0.61, 0.60),
+    # El degradado del fondo desenfocado se le pega por debajo al anillo.
+    'anillo-aguamarina-01.jpg': (0.27, 0.34, 0.73, 0.62),
+}
 
 FOTOS  = Path('fotos')
-THUMBS = FOTOS/'thumbs'
-BACKUP = FOTOS/'_originales'
+THUMBS = FOTOS / 'thumbs'
+BACKUP = FOTOS / '_originales'
 
 
-def sin_borde_malo(img):
-    """Recorta franjas finas de color saturado pegadas al borde (defecto de
-    exportacion, p.ej. una columna de pixeles verdes que engana al detector)."""
-    a = np.asarray(img).astype(np.int16)
-    sat = a.max(axis=2) - a.min(axis=2)   # saturacion aproximada por pixel
-    H, W = sat.shape
-
-    def franjas_malas(perfil):
-        n = 0
-        for v in perfil[:BORDE_MALO_MAX_PX]:
-            if v >= BORDE_MALO_SAT: n += 1
-            else: break
-        return n
-
-    filas, cols = sat.mean(axis=1), sat.mean(axis=0)
-    t, b = franjas_malas(filas), franjas_malas(filas[::-1])
-    l, r = franjas_malas(cols), franjas_malas(cols[::-1])
-    if t or b or l or r:
-        img = img.crop((l, t, W-r, H-b))
-    return img
+# ------------------------------------------------------------------ encuadre
+def _relleno(cw, ch, W, H):
+    """Fraccion de lienzo que habria que inventar con este recorte."""
+    return max(0.0, (cw - W) / cw) + max(0.0, (ch - H) / ch)
 
 
-def subject_bbox(img):
-    g = img.convert('L'); W0, H0 = g.size
-    sc = 700/max(W0, H0)
-    g = g.resize((max(1,int(W0*sc)), max(1,int(H0*sc))))
-    a = gaussian_filter(np.array(g).astype(np.float32), 1.2)
-    mag = gaussian_filter(np.hypot(sobel(a,0), sobel(a,1)), 6)
-    m = mag > max(np.percentile(mag,97)*0.18, mag.max()*0.10)
-    m = binary_opening(binary_closing(m, np.ones((9,9))), np.ones((5,5)))
-    lab, n = label(m)
-    if n == 0: return None
-    sz = np.bincount(lab.ravel()); sz[0] = 0
-    keep = np.where(sz >= sz.max()*0.10)[0]
+def _acomodar(W, H, cw, cx, cy, minimo):
+    """Aplica los topes (relleno maximo, tamano minimo) y centra el recorte."""
+    if _relleno(cw, cw / OUT_ASPECT, W, H) > MAX_RELLENO:
+        lo, hi = min(W, H * OUT_ASPECT), cw
+        for _ in range(40):
+            mid = (lo + hi) / 2
+            if _relleno(mid, mid / OUT_ASPECT, W, H) > MAX_RELLENO:
+                hi = mid
+            else:
+                lo = mid
+        cw = lo
+    cw = max(cw, minimo)
+    ch = cw / OUT_ASPECT
 
-    # descarta componentes contenidos por completo en el margen exterior de UN
-    # borde (brillos del canto de la mesa, restos de franjas defectuosas): una
-    # pieza real —o su cadena— siempre se interna mas en el cuadro.
-    H, W = m.shape
-    mg = BORDE_COMP_MARGEN
-    centrales = []
-    for k in keep:
-        ys, xs = np.where(lab == k)
-        x0, x1, y0, y1 = xs.min()/W, xs.max()/W, ys.min()/H, ys.max()/H
-        if x1 <= mg or x0 >= 1-mg or y1 <= mg or y0 >= 1-mg:
-            continue
-        centrales.append(k)
-    if centrales:
-        keep = centrales
-
-    m2 = np.isin(lab, keep)
-    ys, xs = np.where(m2)
-    return xs.min()/W, ys.min()/H, xs.max()/W, ys.max()/H
-
-
-def plan_crop(W, H, b):
-    """Devuelve (left, top, cw, ch) del recorte, posiblemente fuera de la foto."""
-    x0, y0, x1, y1 = b[0]*W, b[1]*H, b[2]*W, b[3]*H
-    sw, sh = x1-x0, y1-y0
-    cx, cy = (x0+x1)/2, (y0+y1)/2
-
-    deseado = max(sw/TARGET_FILL, (sh/TARGET_FILL)*OUT_ASPECT)  # lo ideal
-    minimo  = max(sw/MAX_FILL,   (sh/MAX_FILL)*OUT_ASPECT)      # para que quepa
-    cabe    = min(W, H*OUT_ASPECT)                              # sin salirse
-
-    cw = max(min(deseado, max(cabe, minimo)), minimo)
-    ch = cw/OUT_ASPECT
-    # centrar en la joya, pero sin salirse mas de lo necesario
-    l = cx - cw/2
-    t = cy - ch/2
-    if cw <= W: l = min(max(l, 0), W-cw)
-    else:       l = (W-cw)/2
-    if ch <= H: t = min(max(t, 0), H-ch)
-    else:       t = (H-ch)/2
+    # centrar en la pieza; si el recorte cabe, se corre lo justo para no salirse
+    l, t = cx - cw / 2, cy - ch / 2
+    if cw <= W:
+        l = min(max(l, 0), W - cw)
+    if ch <= H:
+        t = min(max(t, 0), H - ch)
     return l, t, cw, ch
 
 
-def render(img, l, t, cw, ch):
-    """Recorta; si el recorte se sale, rellena con fondo suave de la propia foto."""
+def plan_crop(W, H, nucleo, full):
+    """Devuelve (left, top, cw, ch, minimo) — el recorte puede caer fuera."""
+    nx0, ny0, nx1, ny1 = nucleo[0] * W, nucleo[1] * H, nucleo[2] * W, nucleo[3] * H
+    nw, nh = nx1 - nx0, ny1 - ny0
+    cx, cy = (nx0 + nx1) / 2, (ny0 + ny1) / 2
+
+    deseado = max(nw / OBJETIVO, (nh / OBJETIVO) * OUT_ASPECT)
+
+    # minimo para que la pieza no toque el borde
+    minimo = max(nw / MAX_FILL, (nh / MAX_FILL) * OUT_ASPECT)
+    fx0, fy0, fx1, fy1 = full[0] * W, full[1] * H, full[2] * W, full[3] * H
+    fw, fh = fx1 - fx0, fy1 - fy0
+    if fw * fh <= nw * nh * FACTOR_CADENA:
+        # sin cadena: la pieza entera tiene que caber
+        minimo = max(minimo, fw / MAX_FILL, (fh / MAX_FILL) * OUT_ASPECT)
+
+    l, t, cw, ch = _acomodar(W, H, deseado, cx, cy, minimo)
+    return l, t, cw, ch, minimo
+
+
+def encuadrar(img, res, pasadas=4, fijo=False):
+    """Encuadra midiendo el RESULTADO, no solo la entrada.
+
+    El detector no da exactamente la misma caja antes y despues de recortar (al
+    cambiar la proporcion de fondo cambian sus estadisticas), y esa diferencia
+    era lo que dejaba unas piezas visiblemente mas chicas que otras aun teniendo
+    todas el mismo objetivo. Aca se renderiza, se vuelve a medir sobre lo
+    renderizado y se corrige el zoom hasta que la pieza mide el objetivo EN LA
+    FOTO FINAL, que es lo unico que se ve.
+    """
+    W, H = img.size
+    l, t, cw, ch, minimo = plan_crop(W, H, res['nucleo'], res['full'])
+    out = render(img, res['mascara'], l, t, cw, ch)
+    mejor = (out, l, t, cw, ch, None)
+    if fijo:
+        # con la caja puesta a mano no hay nada que corregir: volver a medir
+        # solo la arrastraria de vuelta al error que estamos evitando
+        nx = (res['nucleo'][2] - res['nucleo'][0]) * W
+        ny = (res['nucleo'][3] - res['nucleo'][1]) * H
+        return out, max(nx / cw, ny / ch)
+
+    for _ in range(pasadas):
+        r2 = detectar(out)
+        if r2 is None:
+            break
+        n = r2['nucleo']
+        fill = max(n[2] - n[0], n[3] - n[1])
+        if mejor[5] is None or abs(fill - OBJETIVO) < abs(mejor[5] - OBJETIVO):
+            mejor = (out, l, t, cw, ch, fill)
+        if abs(fill - OBJETIVO) <= 0.015:
+            break
+        # el centro de la pieza en la salida, llevado a coordenadas del original
+        cx = l + (n[0] + n[2]) / 2 * cw
+        cy = t + (n[1] + n[3]) / 2 * ch
+        nuevo = cw * (fill / OBJETIVO)
+        l, t, cw, ch = _acomodar(W, H, nuevo, cx, cy, minimo)
+        out = render(img, res['mascara'], l, t, cw, ch)
+
+    return mejor[0], mejor[5]
+
+
+# --------------------------------------------------------- extension de fondo
+def _fondo_limpio(a, sub):
+    """Pixeles de fondo de estudio: ni la pieza, ni la piel de la mano.
+
+    En las fotos puestas (anillo en el dedo, pulsera en la muneca) la piel ocupa
+    medio cuadro y si entra al ajuste tine el fondo inventado de rosado. Se la
+    saca por distancia al color mediano, con dos pasadas de recorte robusto.
+    """
+    fondo = ~sub
+    for _ in range(2):
+        if fondo.sum() < 200:
+            break
+        med = np.median(a[fondo], axis=0)
+        d = np.linalg.norm(a - med, axis=-1)
+        corte = np.percentile(d[fondo], 75) * 1.8 + 6.0
+        nuevo = fondo & (d < corte)
+        if nuevo.sum() < 200:
+            break
+        fondo = nuevo
+    return fondo
+
+
+def _extension_armonica(conocido, valores, iteraciones=260):
+    """Rellena lo desconocido con la continuacion mas suave del borde conocido.
+
+    Es una extension armonica (promediar repetidamente dejando fijo lo conocido).
+    Dos propiedades que aqui importan: empalma exacto con el borde real —no queda
+    el rectangulo de la foto marcado, que es lo que pasaba ajustando un plano— y
+    todo valor nuevo queda dentro del rango de los valores reales, asi que no
+    puede aparecer un color que no estuviera en la foto.
+    """
+    x = valores.copy()
+    x[~conocido] = valores[conocido].mean(axis=0) if conocido.any() else 0.0
+    for _ in range(iteraciones):
+        s = gaussian_filter(x, (1.0, 1.0, 0))
+        x[~conocido] = s[~conocido]
+    return x
+
+
+def extender_fondo(img, mascara_sub, l, t, cw, ch):
+    """Lienzo cw x ch con la foto pegada y el fondo continuado hacia afuera.
+
+    El fondo nuevo se calcula difundiendo el fondo real de la propia foto hacia
+    afuera (extension armonica), a baja resolucion —es una superficie suave, no
+    necesita detalle— y despues se le devuelve el grano para que no quede una
+    zona plastica. La pieza y la piel se marcan como desconocidas para que no
+    tinan la extension: en las fotos puestas la piel ocupa medio cuadro y si
+    entraba al modelo el fondo inventado salia rosado.
+    """
+    a = np.asarray(img).astype(np.float32)
+    H, W, _ = a.shape
+
+    sub = zoom(mascara_sub.astype(np.float32),
+               (H / mascara_sub.shape[0], W / mascara_sub.shape[1]), order=1) > 0.4
+    sub = binary_dilation(sub, np.ones((9, 9)))
+    fondo_px = _fondo_limpio(a, sub)
+    if fondo_px.sum() < 200:
+        fondo_px = ~sub
+
+    cw_i, ch_i = int(round(cw)), int(round(ch))
+    l_i, t_i = int(round(l)), int(round(t))
+
+    # --- resolver la extension en chico
+    esc = min(1.0, 190 / max(cw_i, ch_i))
+    lw, lh = max(8, int(cw_i * esc)), max(8, int(ch_i * esc))
+    chico = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8)).resize(
+        (max(1, int(W * esc)), max(1, int(H * esc))), Image.LANCZOS)
+    fondo_chico = np.asarray(Image.fromarray((fondo_px * 255).astype(np.uint8)).resize(
+        chico.size, Image.BILINEAR)) > 200
+
+    conocido = np.zeros((lh, lw), bool)
+    valores = np.zeros((lh, lw, 3), np.float32)
+    ox, oy = int(round(-l_i * esc)), int(round(-t_i * esc))
+    ax0, ay0 = max(0, ox), max(0, oy)
+    ax1, ay1 = min(lw, ox + chico.width), min(lh, oy + chico.height)
+    if ax1 > ax0 and ay1 > ay0:
+        recorte = np.asarray(chico).astype(np.float32)[ay0 - oy:ay1 - oy, ax0 - ox:ax1 - ox]
+        mrec = fondo_chico[ay0 - oy:ay1 - oy, ax0 - ox:ax1 - ox]
+        valores[ay0:ay1, ax0:ax1] = recorte
+        conocido[ay0:ay1, ax0:ax1] = mrec
+    if not conocido.any():
+        conocido[:] = True
+        valores[:] = np.median(a[fondo_px], axis=0)
+
+    ext = _extension_armonica(conocido, valores)
+    lienzo = np.asarray(Image.fromarray(np.clip(ext, 0, 255).astype(np.uint8)).resize(
+        (cw_i, ch_i), Image.BICUBIC)).astype(np.float32)
+
+    # --- grano, para que el fondo nuevo no se vea plastico
+    lum = a.mean(-1)
+    grano = float(np.std((lum - gaussian_filter(lum, 3))[fondo_px]))
+    if grano > 0.05:
+        ruido = np.random.default_rng(0).normal(0, grano, (ch_i, cw_i)).astype(np.float32)
+        lienzo += gaussian_filter(ruido, 0.6)[..., None]
+
+    # --- pegar la foto real, difuminando solo los bordes que se extendieron
+    lienzo_img = Image.fromarray(np.clip(lienzo, 0, 255).astype(np.uint8))
+    pluma = max(3, int(min(W, H) * 0.020))
+    alpha = np.full((H, W), 255.0, np.float32)
+    rampa = np.linspace(0, 255, pluma)
+    if l_i < 0:
+        alpha[:, :pluma] = np.minimum(alpha[:, :pluma], rampa[None, :])
+    if t_i < 0:
+        alpha[:pluma, :] = np.minimum(alpha[:pluma, :], rampa[:, None])
+    if l_i + cw_i > W:
+        alpha[:, -pluma:] = np.minimum(alpha[:, -pluma:], rampa[::-1][None, :])
+    if t_i + ch_i > H:
+        alpha[-pluma:, :] = np.minimum(alpha[-pluma:, :], rampa[::-1][:, None])
+    lienzo_img.paste(img, (-l_i, -t_i), Image.fromarray(alpha.astype(np.uint8)))
+    return lienzo_img
+
+
+def render(img, mascara_sub, l, t, cw, ch):
     W, H = img.size
     l_i, t_i, cw_i, ch_i = int(round(l)), int(round(t)), int(round(cw)), int(round(ch))
-
-    if l_i >= 0 and t_i >= 0 and l_i+cw_i <= W and t_i+ch_i <= H:
-        return img.crop((l_i, t_i, l_i+cw_i, t_i+ch_i))   # cabe entero: sin invento
-
-    # fondo suave: version muy desenfocada de la foto, estirada al cuadro nuevo.
-    # Al no tener detalle, estirarla no produce rayas ni manchones.
-    base = img.copy().filter(ImageFilter.GaussianBlur(max(W, H)*0.06))
-    canvas = base.resize((cw_i, ch_i), Image.LANCZOS)
-
-    # pegar la foto real encima con los bordes difuminados
-    px, py = -l_i, -t_i
-    mask = Image.new('L', img.size, 255)
-    feather = int(max(W, H)*0.03)
-    if feather > 1:
-        m = np.array(mask).astype(np.float32)
-        ramp = np.linspace(0, 255, feather)
-        m[:feather, :] = np.minimum(m[:feather, :], ramp[:, None])
-        m[-feather:, :] = np.minimum(m[-feather:, :], ramp[::-1][:, None])
-        m[:, :feather] = np.minimum(m[:, :feather], ramp[None, :])
-        m[:, -feather:] = np.minimum(m[:, -feather:], ramp[::-1][None, :])
-        mask = Image.fromarray(m.astype(np.uint8))
-    canvas.paste(img, (px, py), mask)
-    return canvas
+    if l_i >= 0 and t_i >= 0 and l_i + cw_i <= W and t_i + ch_i <= H:
+        return img.crop((l_i, t_i, l_i + cw_i, t_i + ch_i))   # cabe entero
+    return extender_fondo(img, mascara_sub, l_i, t_i, cw_i, ch_i)
 
 
 def resize_long(img, longside):
+    """Lleva la foto a `longside`, agrandando si hace falta.
+
+    Igualar el tamano de la pieza obliga a recortar, y en las fotos que venian
+    chicas eso dejaba archivos de 300-400 px que en el celular se veian blandos.
+    Se permite agrandar hasta MAX_AGRANDE (mas que eso ya es puro invento) con
+    Lanczos y un enfoque suave, que se ve mejor que dejar que el navegador
+    estire un archivo diminuto.
+    """
     W, H = img.size
-    if max(W, H) <= longside: return img
-    sc = longside/max(W, H)
-    return img.resize((int(W*sc), int(H*sc)), Image.LANCZOS)
+    actual = max(W, H)
+    objetivo = min(longside, actual * MAX_AGRANDE)
+    if abs(objetivo - actual) < 1:
+        return img
+    sc = objetivo / actual
+    out = img.resize((max(1, round(W * sc)), max(1, round(H * sc))), Image.LANCZOS)
+    if sc > 1.05:
+        out = out.filter(ImageFilter.UnsharpMask(radius=1.2, percent=55, threshold=3))
+    return out
 
 
+# ---------------------------------------------------------------------- main
 def main():
     dry = '--dry-run' in sys.argv
+    solo = None
+    if '--solo' in sys.argv:
+        solo = set(sys.argv[sys.argv.index('--solo') + 1].split(','))
+
     if not FOTOS.is_dir():
         sys.exit('Corre esto desde la raiz del repo (no encuentro fotos/).')
     THUMBS.mkdir(exist_ok=True)
-    if not dry: BACKUP.mkdir(exist_ok=True)
+    if not dry:
+        BACKUP.mkdir(exist_ok=True)
 
-    avisos = []
-    ok = 0
+    avisos, fills, ok = [], [], 0
     for p in sorted(FOTOS.glob('*.jpg')):
         if p.name in EXCLUIR:
             print(f'  - {p.name}: excluida (no es foto de producto)')
             continue
-        src = BACKUP/p.name if (BACKUP/p.name).exists() else p
+        if solo and p.name not in solo:
+            continue
+
+        src = BACKUP / p.name if (BACKUP / p.name).exists() else p
         img = sin_borde_malo(Image.open(src).convert('RGB'))
-        b = subject_bbox(img)
-        if b is None:
-            print(f'  ! {p.name}: no detecte la pieza, la dejo igual'); continue
+        res = detectar(img)
+        if res is None:
+            print(f'  ! {p.name}: no detecte la pieza, la dejo igual')
+            continue
+
+        a_mano = CAJAS_A_MANO.get(p.name)
+        if a_mano:
+            res['nucleo'] = res['full'] = a_mano
 
         W, H = img.size
-        l, t, cw, ch = plan_crop(W, H, b)
-        invent = max(0, (cw-W)/cw) + max(0, (ch-H)/ch)
-        if invent > 0.15:
-            avisos.append((p.name, invent))
+        l, t, cw, ch, _ = plan_crop(W, H, res['nucleo'], res['full'])
+        rell = _relleno(cw, ch, W, H)
+        if rell > 0.02:
+            avisos.append((p.name, rell))
 
         if dry:
-            print(f'  · {p.name}: {W}x{H} -> {int(cw)}x{int(ch)}' + (f'  (fondo agregado {invent*100:.0f}%)' if invent>0.02 else ''))
-            ok += 1; continue
+            nw = (res['nucleo'][2] - res['nucleo'][0]) * W
+            nh = (res['nucleo'][3] - res['nucleo'][1]) * H
+            fills.append(max(nw / cw, nh / ch))
+            print(f'  · {p.name}: {W}x{H} -> {int(cw)}x{int(ch)}'
+                  + (f'  fondo agregado {rell*100:.0f}%' if rell > 0.02 else ''))
+            ok += 1
+            continue
 
-        out = render(img, l, t, cw, ch)
-        if not (BACKUP/p.name).exists(): shutil.copy2(p, BACKUP/p.name)
+        out, fill = encuadrar(img, res, fijo=bool(a_mano))
+        fills.append(fill if fill is not None else OBJETIVO)
+        if fill is not None and abs(fill - OBJETIVO) > 0.05:
+            print(f'  ~ {p.name}: la pieza quedo al {fill:.0%} (objetivo {OBJETIVO:.0%})')
+        if not (BACKUP / p.name).exists():
+            shutil.copy2(p, BACKUP / p.name)
         resize_long(out, FULL_LONGSIDE).save(p, 'JPEG', quality=FULL_Q, optimize=True)
-        resize_long(out, THUMB_LONGSIDE).save(THUMBS/p.name, 'JPEG', quality=THUMB_Q, optimize=True)
+        resize_long(out, THUMB_LONGSIDE).save(THUMBS / p.name, 'JPEG',
+                                              quality=THUMB_Q, optimize=True)
         ok += 1
 
     print(f'\nListo: {ok} fotos.')
+    if fills:
+        f = np.array(fills)
+        print(f'Tamano de la pieza en el cuadro: min={f.min():.0%} '
+              f'mediana={np.median(f):.0%} max={f.max():.0%}  (objetivo {OBJETIVO:.0%})')
+        print(f'Fuera del objetivo por mas de 3 puntos: '
+              f'{int((np.abs(f - OBJETIVO) > 0.03).sum())} de {len(f)}')
     if avisos:
-        print('\nOJO — a estas fotos hubo que agregarles bastante fondo porque la')
-        print('pieza no cabe en formato vertical 4:5. Revisalas y considera')
-        print('reemplazarlas por una toma vertical:')
-        for n, v in sorted(avisos, key=lambda x: -x[1]):
-            print(f'   {n:<40} {v*100:.0f}% de fondo agregado')
+        print(f'\nCon fondo agregado ({len(avisos)}):')
+        for n, v in sorted(avisos, key=lambda x: -x[1])[:20]:
+            print(f'   {n:<44} {v*100:.0f}%')
 
 
 if __name__ == '__main__':

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Página no encontrada · Paz Ausin Joyas</title>
 <meta name="theme-color" content="#0B0A09">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="/paz-ausin-joyas/fotos/paz-ausin-estrella-favicon.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +43,11 @@
     <div class="star">✦</div>
     <h1>Página no encontrada</h1>
     <p>Esta página no existe o se movió de lugar.</p>
-    <a class="btn" href="index.html">Volver al catálogo</a>
+    <!-- Ruta absoluta a propósito: GitHub Pages muestra esta página para
+         cualquier dirección que no exista (p.ej. /piezas/algo), y con un enlace
+         relativo "index.html" el botón llevaba a otro 404. Al pasar a dominio
+         propio, esto queda simplemente "/". -->
+    <a class="btn" href="/paz-ausin-joyas/">Volver al catálogo</a>
   </div>
 </body>
 </html>
