@@ -55,17 +55,14 @@ archivo: `index.html` (HTML + CSS + JS, sin frameworks, sin build step).
   agrega flechas y contador automáticamente cuando hay más de una). Archivos en
   `fotos/`, nombre en kebab-case, lado mayor máx. 1600px, peso ideal <400 KB.
 
-## Fotos: encuadre automático (importante al agregar una pieza)
-Las fotos NO se recortan a mano. Se deja la foto original en `fotos/` y se corre:
-```bash
-python3 scripts/normalizar-fotos.py        # requiere pillow, numpy, scipy
-```
-Deja la joya centrada y ocupando el 71,5% del cuadro 4:5 en todas las fotos, y
-regenera `fotos/thumbs/`. Reprocesa siempre desde `fotos/_originales/` (que es la
-fuente — **no borrar esa carpeta**), así que correrlo dos veces no degrada nada.
-Si el detector se equivoca en una foto puntual, se le indica la caja a mano en
-`CAJAS_A_MANO`, dentro del script, en vez de tocar los umbrales generales.
-Detalle de cómo funciona y por qué: `cambios-v6-fotos-parejas-y-bugs.md`.
+## Fotos: sin recorte automático
+Cada foto en `fotos/` es la original redimensionada proporcional — sin recortar,
+sin cambiar relación de aspecto (ver convención de peso/tamaño arriba). El
+encuadre visible en la grilla lo resuelve el CSS, no el archivo. Hubo una etapa
+anterior con un script (`scripts/normalizar-fotos.py`) que recortaba y centraba
+cada foto a mano, con respaldo en `fotos/_originales/`; se retiró porque en
+piezas apaisadas inventaba fondo para rellenar el recorte. Detalle de por qué y
+qué se restauró: `cambios-fotos-originales.md`.
 
 ## Pendiente / por confirmar con la mamá (no inventar estos datos)
 - Precios exactos por pieza — los actuales ya están dentro del rango real estimado
