@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Paz Ausin Joyas · Orfebrería hecha a mano</title>
-<meta name="description" content="Joyería fina hecha a mano. Piezas únicas en Plata 950, Oro 18K y piedras naturales. Hecho a mano en Chile.">
+<meta name="description" content="Joyería fina hecha a mano. Piezas únicas en Plata 950, Oro 18K, Platino y piedras naturales. Hecho a mano en Chile.">
 
 <!-- Meta tags para compartir por WhatsApp / Instagram.
      OJO: og:image y og:url TIENEN que ser direcciones completas (https://...).
@@ -12,7 +12,7 @@
      compartía sin foto de vista previa. Al pasar a dominio propio, cambiar las
      tres líneas de abajo y el <link rel="canonical">. -->
 <meta property="og:title" content="Paz Ausin Joyas · Orfebrería hecha a mano">
-<meta property="og:description" content="Piezas únicas en Plata 950, Oro 18K y piedras naturales. Hecho a mano en Chile.">
+<meta property="og:description" content="Piezas únicas en Plata 950, Oro 18K, Platino y piedras naturales. Hecho a mano en Chile.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Paz Ausin Joyas">
 <meta property="og:locale" content="es_CL">
@@ -36,7 +36,7 @@
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Paz Ausin Joyas",
-  "description": "Joyería fina hecha a mano en Chile. Piezas únicas en Plata 950, Oro 18K y piedras naturales.",
+  "description": "Joyería fina hecha a mano en Chile. Piezas únicas en Plata 950, Oro 18K, Platino y piedras naturales.",
   "url": "https://lmassoud.github.io/paz-ausin-joyas/",
   "logo": "https://lmassoud.github.io/paz-ausin-joyas/fotos/paz-ausin-estrella-favicon.png",
   "areaServed": "CL",
@@ -44,10 +44,12 @@
 }
 </script>
 
-<!-- Tipografías: Cormorant Garamond (títulos) + Jost (texto) -->
+<!-- Tipografías: Bodoni Moda (serif Didone de alto contraste, variable — títulos)
+     + Manrope (texto). Se descartó Fraunces por ser una fuente "de moda" que el
+     detector de Impeccable marca como sobreusada en sitios generados con IA. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
   /* ============================================================
@@ -58,8 +60,7 @@
     --text:        #EDE9E2;   /* texto principal */
     --text-soft:   #E3DCCF;   /* párrafos */
     --text-dim:    #8C8880;   /* texto secundario */
-    --text-faint:  #6E6A63;   /* etiquetas tenues */
-    --text-faintest:#55524C;  /* casi invisible */
+    --text-faintest:#807C73;  /* rótulo "sin foto" — el valor anterior (#55524C) daba 2.5:1 de contraste, bajo el mínimo AA */
     --accent:      #C6A15B;   /* acento dorado  (alternativa plata: #C8CCD2) */
     --accent-bright:#D8BC7E;  /* dorado más claro, para la burbuja de precio */
     --accent-ink:  #100E08;   /* texto sobre el acento */
@@ -91,8 +92,8 @@
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: 'Jost', sans-serif;
-    font-weight: 300;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
   }
@@ -101,7 +102,7 @@
 
   .wrap { max-width: var(--maxw); margin: 0 auto; padding-left: 22px; padding-right: 22px; }
 
-  .serif { font-family: 'Cormorant Garamond', serif; }
+  .serif { font-family: 'Bodoni Moda', serif; }
 
   /* ---------- Barra superior ---------- */
   .topbar {
@@ -116,43 +117,82 @@
     padding: 18px 22px; max-width: var(--maxw); margin: 0 auto;
   }
   .brand-mark {
-    font-family: 'Cormorant Garamond', serif; font-size: 19px;
+    font-family: 'Bodoni Moda', serif; font-weight: 500; font-size: 20px;
     letter-spacing: 0.03em; color: var(--text);
   }
   .nav { display: flex; gap: 20px; align-items: center;
-    font-size: 12px; letter-spacing: 0.04em; }
-  /* padding+margin negativo = zona táctil más grande sin mover el texto visualmente */
+    font-weight: 500; font-size: 12px; letter-spacing: 0.03em; }
+  /* padding+margin negativo = zona táctil más grande sin mover el texto visualmente.
+     17px vertical alcanza los 44px mínimos de zona táctil incluso con el
+     font-size más chico (9.5px en mobile). */
   .nav a { text-decoration: none; color: var(--text-soft); transition: color .2s, opacity .2s;
-    padding: 12px 8px; margin: -12px -8px; border-radius: 999px; }
+    padding: 17px 10px; margin: -17px -10px; border-radius: 999px; }
   .nav a.wa {
     color: var(--accent-ink); background: var(--accent); font-weight: 500;
-    padding: 10px 14px; margin: -10px 0;
+    padding: 17px 14px; margin: -17px 0;
   }
   .nav a:hover { color: var(--text); }
   .nav a.wa:hover { color: var(--accent-ink); opacity: 0.88; }
 
   /* ---------- Hero ---------- */
+  /* Composición acordada tras panel de 3 criterios (minimalismo de lujo
+     silencioso, editorial/maximalista, UX de conversión): un solo gesto
+     fuerte (el título) y todo lo demás en silencio real alrededor — sin
+     relleno atmosférico. El halo/estrella de fondo que hubo acá se sacó:
+     los tres coincidieron en que era decoración sin función, a diferencia
+     del título grande, que sí es información con estructura. */
   .hero { max-width: var(--maxw); margin: 0 auto; padding: 84px 22px 96px; text-align: center; }
   .eyebrow {
-    font-size: 13px; letter-spacing: 0.05em;
-    color: var(--accent); margin-bottom: 30px;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(198,161,91,0.75); margin-bottom: 26px;
   }
+  /* .hero-main envuelve título + divisor + info: en mobile es un bloque más
+     (mismo orden y look de siempre); desde 961px se vuelve una cartela de
+     galería — título grande a un lado, ficha técnica al otro — en vez de
+     todo apilado y centrado. */
   .hero h1 {
-    font-family: 'Cormorant Garamond', serif; font-weight: 500;
-    font-size: clamp(48px, 13vw, 96px); line-height: 0.98; margin: 0; letter-spacing: 0.01em;
+    font-family: 'Bodoni Moda', serif; font-weight: 700;
+    font-size: clamp(58px, 14vw, 108px); line-height: 0.94; margin: 0; letter-spacing: -0.01em;
   }
-  .hero h1 .italic { font-style: italic; color: #C8C2B7; }
+  .hero h1 .italic { font-style: italic; font-weight: 400; color: #C8C2B7; }
   .flourish {
     display: flex; align-items: center; justify-content: center; gap: 16px;
-    margin: 34px 0 26px; color: var(--accent); font-size: 13px;
+    margin: 30px 0 24px; color: var(--accent); font-size: 13px;
   }
-  .flourish .l { height: 1px; width: 42px; background: linear-gradient(90deg, transparent, rgba(198,161,91,0.5)); }
-  .flourish .r { height: 1px; width: 42px; background: linear-gradient(90deg, rgba(198,161,91,0.5), transparent); }
+  .flourish .l { height: 1px; width: 32px; background: linear-gradient(90deg, transparent, rgba(198,161,91,0.4)); }
+  .flourish .r { height: 1px; width: 32px; background: linear-gradient(90deg, rgba(198,161,91,0.4), transparent); }
   .hero p {
-    max-width: 440px; margin: 0 auto; font-size: 15px; line-height: 1.9;
+    max-width: 440px; margin: 0 auto; font-size: 14px; line-height: 1.9;
     letter-spacing: 0.04em; color: var(--text-soft);
   }
-  .hero-cta { margin-top: 34px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  /* Dos CTA del mismo peso táctil (min 52px) y misma forma pill: la regla de
+     DESIGN.md (interactivo = redondeado, foto de producto = recto) se mantiene
+     en ambos botones. El ghost distingue "ver piezas" de "escribir" sin bajarle
+     jerarquía visual. */
+  .hero-cta { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .hero-cta .btn {
+    padding: 16px 32px; font-size: 15px; letter-spacing: 0.14em; min-height: 52px;
+  }
+
+  /* ---------- Hero: cartela de galería (desktop) ---------- */
+  @media (min-width: 961px) {
+    .hero { max-width: 1320px; }
+    .hero-main {
+      display: grid; grid-template-columns: 1.15fr auto 1fr;
+      align-items: center; column-gap: 48px; text-align: left;
+    }
+    .hero h1 { text-align: right; font-size: clamp(64px, 6.4vw, 86px); }
+    .flourish {
+      flex-direction: column; align-self: stretch; justify-self: center;
+      margin: 0; gap: 18px;
+    }
+    .flourish .l, .flourish .r { width: 1px; height: auto; flex: 1; min-height: 36px; }
+    .flourish .l { background: linear-gradient(180deg, transparent, rgba(198,161,91,0.4)); }
+    .flourish .r { background: linear-gradient(180deg, rgba(198,161,91,0.4), transparent); }
+    .hero-info { text-align: left; }
+    .hero p { margin: 0; text-align: left; }
+    .hero-cta { align-items: flex-start; }
+  }
 
   /* ---------- Cómo comprar ---------- */
   .how-to-buy {
@@ -169,8 +209,8 @@
     display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 26px;
   }
   .section-head h2 {
-    font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 30px;
-    margin: 0; letter-spacing: 0.02em;
+    font-family: 'Bodoni Moda', serif; font-weight: 600; font-size: 32px;
+    margin: 0; letter-spacing: -0.005em;
   }
   .hint { font-size: 11px; letter-spacing: 0.05em; color: var(--text-soft); }
 
@@ -207,12 +247,12 @@
   .thumb .corner { position: absolute; z-index: 1; top: 10px; left: 10px;
     width: 15px; height: 15px; object-fit: contain; opacity: 0.6;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)); }
-  .thumb .ghost { font-family: 'Cormorant Garamond', serif; font-size: 34px; color: rgba(237,233,226,0.10); }
+  .thumb .ghost { font-family: 'Bodoni Moda', serif; font-size: 34px; color: rgba(237,233,226,0.10); }
   .thumb .slot {
     position: absolute; bottom: 12px; left: 0; right: 0; text-align: center;
-    font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faintest);
+    font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-faintest);
   }
-  .card .name { padding: 12px 2px 4px; font-family: 'Cormorant Garamond', serif; font-size: 19px; letter-spacing: 0.02em; color: #E6E1D8;
+  .card .name { padding: 12px 2px 4px; font-family: 'Bodoni Moda', serif; font-weight: 500; font-size: 20px; letter-spacing: 0.01em; color: #E6E1D8;
     display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.3em; }
   .card .materials { font-size: 11px; letter-spacing: 0.04em; color: var(--accent); margin-top: 2px;
     display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2em; }
@@ -222,7 +262,7 @@
     border: 1px solid rgba(255,255,255,0.14); padding: 4px 10px; border-radius: 999px;
   }
   .variant-pill {
-    position: absolute; bottom: 12px; left: 12px; font-size: 10px; letter-spacing: 0.04em;
+    position: absolute; bottom: 12px; left: 12px; font-size: 11px; letter-spacing: 0.04em;
     color: var(--text-soft); background: rgba(11,10,9,.75);
     border: 1px solid rgba(255,255,255,0.14); padding: 3px 9px; border-radius: 999px;
   }
@@ -238,8 +278,8 @@
   /* ---------- Portafolio ---------- */
   .portfolio-head { text-align: center; margin-bottom: 30px; }
   .portfolio-head h2 {
-    font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 30px;
-    margin: 0 0 8px; letter-spacing: 0.02em;
+    font-family: 'Bodoni Moda', serif; font-weight: 600; font-size: 32px;
+    margin: 0 0 8px; letter-spacing: -0.005em;
   }
   .portfolio-head p { font-size: 13px; letter-spacing: 0.05em; color: var(--text-soft); margin: 0; }
   .portfolio-head p.portfolio-count { font-size: 11px; letter-spacing: 0.05em; color: var(--accent); margin: 0 0 8px; }
@@ -252,31 +292,31 @@
   .sold .thumb { background: repeating-linear-gradient(135deg, var(--sold-a) 0 11px, var(--sold-b) 11px 22px); }
   .sold .ghost { font-size: 30px; color: rgba(237,233,226,0.07); }
   .badge {
-    position: absolute; top: 12px; right: 12px; font-size: 9.5px; letter-spacing: 0.05em;
+    position: absolute; top: 12px; right: 12px; font-size: 11px; letter-spacing: 0.05em;
     color: var(--text-soft); background: rgba(11,10,9,.75);
     border: 1px solid rgba(255,255,255,0.14); padding: 3px 8px; border-radius: 999px;
   }
-  .sold .name { color: #B8B3AA; font-size: 18px; letter-spacing: 0.02em; }
+  .sold .name { color: #B8B3AA; font-weight: 500; font-size: 19px; letter-spacing: 0.01em; }
   .sold .materials { color: var(--text-soft); }
 
   /* ---------- Sobre la orfebre ---------- */
   .about { max-width: 620px; margin: 0 auto; padding: 92px 22px; text-align: center; }
   .about .star { color: var(--accent); font-size: 12px; margin-bottom: 22px; }
   .about h2 {
-    font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 27px;
-    margin: 0 0 20px; letter-spacing: 0.01em;
+    font-family: 'Bodoni Moda', serif; font-weight: 600; font-size: 30px;
+    margin: 0 0 20px; letter-spacing: -0.005em;
   }
   .about p { font-size: 15.5px; line-height: 2; letter-spacing: 0.03em; color: var(--text-soft); margin: 0; }
 
   /* ---------- Footer ---------- */
   footer { border-top: 1px solid var(--line); padding: 56px 22px 64px; text-align: center; }
-  footer .fname { font-family: 'Cormorant Garamond', serif; font-size: 26px; letter-spacing: 0.06em; margin-bottom: 8px; }
+  footer .fname { font-family: 'Bodoni Moda', serif; font-weight: 500; font-size: 28px; letter-spacing: 0.04em; margin-bottom: 8px; }
   footer .ftag { font-size: 12px; letter-spacing: 0.04em; color: var(--text-soft); margin-bottom: 14px; }
   footer .footer-note { font-size: 12px; color: var(--text-soft); margin: 0 0 30px; }
   .footer-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
   .btn {
     text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-    font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 500; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
     padding: 13px 26px; border-radius: 999px; transition: opacity .2s, transform .2s;
   }
   .btn:hover { transform: translateY(-1px); }
@@ -314,7 +354,7 @@
     flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover;
     user-select: none; -webkit-user-drag: none; pointer-events: none;
   }
-  .sheet-photo .ghost { font-family: 'Cormorant Garamond', serif; font-size: 52px; color: rgba(237,233,226,0.10); }
+  .sheet-photo .ghost { font-family: 'Bodoni Moda', serif; font-size: 52px; color: rgba(237,233,226,0.10); }
   .sheet-photo .slot {
     position: absolute; bottom: 16px; left: 0; right: 0; text-align: center;
     font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-faintest);
@@ -350,14 +390,14 @@
   .sheet-body { padding: 26px 26px 30px; }
   .sheet-body .status { font-size: 11px; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 12px; }
   .sheet-body .status.is-sold { color: var(--text-soft); }
-  .sheet-body h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 32px; margin: 0 0 6px; line-height: 1.05; letter-spacing: 0.02em; }
-  .sheet-body .price { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #E6E1D8; margin-bottom: 18px; }
+  .sheet-body h3 { font-family: 'Bodoni Moda', serif; font-weight: 600; font-size: 36px; margin: 0 0 6px; line-height: 1.02; letter-spacing: -0.005em; }
+  .sheet-body .price { font-family: 'Bodoni Moda', serif; font-weight: 500; font-size: 26px; color: #E6E1D8; margin-bottom: 18px; }
   .sheet-body .desc { font-size: 14.5px; line-height: 1.9; letter-spacing: 0.03em; color: var(--text-soft); margin: 0 0 8px; }
   .sheet-body .materials { font-size: 12px; letter-spacing: 0.05em; color: var(--text-soft); margin: 0 0 26px; }
   .sheet-body .materials.is-sold { color: var(--text-soft); }
   .sheet-body .wa {
     text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: var(--accent); color: var(--accent-ink); font-size: 14px; letter-spacing: 0.1em;
+    background: var(--accent); color: var(--accent-ink); font-weight: 500; font-size: 14px; letter-spacing: 0.08em;
     text-transform: uppercase; padding: 16px; border-radius: 12px;
   }
   .sheet-body .note { text-align: center; font-size: 11px; letter-spacing: 0.05em; color: var(--text-dim); margin: 14px 0 0; }
@@ -380,13 +420,18 @@
   /* ---------- Responsive ---------- */
   @media (max-width: 640px) {
     .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .card .name { font-size: 16px; }
-    .sold .name { font-size: 15px; }
+    .card .name { font-size: 17px; }
+    .sold .name { font-size: 16px; }
     .topbar-inner { padding: 14px 16px; }
-    .brand-mark { font-size: 15px; }
+    .brand-mark { font-size: 16px; }
     .nav { gap: 10px; font-size: 9.5px; }
     .how-to-buy { flex-direction: column; gap: 10px; padding-bottom: 32px; }
     #nav-ig { display: none; }
+
+    /* Bodoni Moda es mucho más ancho por carácter que la Cormorant Garamond
+       anterior: "Disponible ahora" + "Toca una pieza" en la misma fila casi
+       se tocaban. Se apilan y el hint queda como nota chica debajo del título. */
+    .section-head { flex-direction: column; align-items: flex-start; gap: 4px; }
 
     /* Subir piezas "sobre el pliegue": achicar hero y separaciones */
     .hero { padding: 40px 22px 48px; }
@@ -395,6 +440,15 @@
     .hero-cta { margin-top: 22px; gap: 10px; }
     .btn { padding: 12px 22px; font-size: 12px; }
     .section-head { margin-bottom: 18px; }
+  }
+
+  /* En desktop la ficha de detalle deja de comportarse como una hoja de
+     celular pegada al borde inferior y pasa a ser un diálogo centrado con
+     esquinas completas — la hoja bottom-sheet tiene sentido en el pulgar de
+     un celular, no en una pantalla ancha. */
+  @media (min-width: 641px) {
+    .overlay { align-items: center; padding: 40px 20px; }
+    .sheet { border-bottom: 1px solid rgba(255,255,255,0.08); border-radius: 20px; max-height: 88vh; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -419,15 +473,20 @@
     </div>
   </div>
 
+  <main>
   <!-- Hero -->
   <section class="hero">
     <div class="eyebrow">Orfebrería · Hecho a mano</div>
-    <h1 class="serif">Paz Ausin<br><span class="italic">Joyas</span></h1>
-    <div class="flourish"><span class="l"></span><span>✦</span><span class="r"></span></div>
-    <p>Joyería fina hecha a mano · Piezas únicas<br>Plata 950 · Oro 18K · Piedras naturales</p>
-    <div class="hero-cta">
-      <a id="hero-wa" class="btn btn-primary" href="#" target="_blank" rel="noopener">Escríbeme por WhatsApp</a>
-      <a href="#disponible" class="btn btn-ghost">Ver piezas disponibles</a>
+    <div class="hero-main">
+      <h1 class="serif">Paz Ausin<br><span class="italic">Joyas</span></h1>
+      <div class="flourish"><span class="l"></span><span>✦</span><span class="r"></span></div>
+      <div class="hero-info">
+        <p>Joyería fina hecha a mano · Piezas únicas<br>Plata 950 · Oro 18K · Platino · Piedras naturales</p>
+        <div class="hero-cta">
+          <a id="hero-wa" class="btn btn-primary" href="#" target="_blank" rel="noopener">Escríbeme por WhatsApp</a>
+          <a href="#disponible" class="btn btn-ghost">Ver piezas disponibles</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -481,6 +540,7 @@
     <h2 class="serif">Sobre la orfebre</h2>
     <p>Maria Paz Ausin lleva más de doce años dando forma a la plata y el oro a mano, pieza por pieza. Cada joya nace de un oficio paciente y se hace una sola vez: única, irrepetible, pensada para acompañar toda una vida.</p>
   </section>
+  </main>
 
   <!-- Footer -->
   <footer>
@@ -648,6 +708,18 @@ const firstImg = (item) => photosOf(item)[0];
 // Miniatura de grilla: misma foto de portada, versión liviana en fotos/thumbs/
 const thumbSrc = (item) => { const f = firstImg(item); return f ? f.replace('fotos/', 'fotos/thumbs/') : null; };
 
+// Si la foto de portada no carga (ruta rota, o una pieza recién agregada sin
+// fotos subidas todavía), se reemplaza por el mismo placeholder ✦ que ya se
+// usa cuando la pieza no tiene foto — así nunca queda el ícono de imagen rota
+// del navegador sobre la tarjeta.
+function onThumbError(img) {
+  const thumb = img.closest('.thumb');
+  const slot = img.dataset.slot || '';
+  img.remove();
+  thumb.insertAdjacentHTML('afterbegin', '<span class="ghost">✦</span>');
+  thumb.insertAdjacentHTML('beforeend', `<span class="slot">foto${slot ? ' · ' + slot : ''}</span>`);
+}
+
 // Enlaces fijos (nav + footer)
 const waGeneral = waLink('Hola! Vi tu página y quiero consultar por una joya');
 document.getElementById('nav-ig').href   = CONFIG.instagram;
@@ -673,7 +745,7 @@ function cardAvailable(item) {
   btn.innerHTML = `
     <div class="thumb">
       <img class="corner" src="fotos/paz-ausin-estrella-favicon.png" alt="" loading="lazy" decoding="async">
-      ${thumb ? `<img src="${escapar(thumb)}" alt="${nombre}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
+      ${thumb ? `<img src="${escapar(thumb)}" alt="${nombre}" data-slot="${escapar(item.slot)}" loading="lazy" decoding="async" onerror="onThumbError(this)">` : `<span class="ghost">✦</span>`}
       ${!thumb ? `<span class="slot">foto · ${escapar(item.slot)}</span>` : ''}
       ${price ? `<span class="price-pill">${escapar(price)}</span>` : ''}
       ${item.variantsNote ? `<span class="variant-pill">${escapar(item.variantsNote)}</span>` : ''}
@@ -692,7 +764,7 @@ function cardSold(item) {
   const nombre = escapar(item.name);
   btn.innerHTML = `
     <div class="thumb">
-      ${thumb ? `<img src="${escapar(thumb)}" alt="${nombre}" loading="lazy" decoding="async">` : `<span class="ghost">✦</span>`}
+      ${thumb ? `<img src="${escapar(thumb)}" alt="${nombre}" data-slot="${escapar(item.slot)}" loading="lazy" decoding="async" onerror="onThumbError(this)">` : `<span class="ghost">✦</span>`}
       <span class="badge">Vendido</span>
       ${!thumb ? `<span class="slot">foto · ${escapar(item.slot)}</span>` : ''}
     </div>
@@ -756,6 +828,7 @@ let currentPhotoIndex = 0;
 let currentPhotoName = '';
 let dragState = null;
 let ultimaTarjeta = null;   // la tarjeta desde la que se abrió el overlay
+let overlayHistoryPushed = false;   // si hay un estado de historial propio por consumir al cerrar
 
 function multiPhoto() { return currentPhotos.length > 1; }
 function isAtStart() { return currentPhotoIndex === 0; }
@@ -979,9 +1052,17 @@ function openDetail(item, isSold, origen) {
   pageEl.inert = true;
   document.body.style.overflow = 'hidden';
   document.getElementById('sheet-close').focus();
+  // Empuja un estado de historial propio para que el botón/gesto "atrás" del
+  // celular cierre la ficha en vez de sacar al visitante del sitio entero.
+  // La mayoría del tráfico llega desde Instagram y el swipe-back es el gesto
+  // más natural para "salir" de algo que se abrió — sin esto, ese gesto
+  // abandonaba la página justo en el momento de mayor intención de compra.
+  history.pushState({ pzOverlay: true }, '');
+  overlayHistoryPushed = true;
 }
 
-function closeDetail() {
+function closeDetail(fromPopstate) {
+  if (overlay.hidden) return;   // ya estaba cerrada (p.ej. el back del historial ya la cerró)
   overlay.hidden = true;
   pageEl.inert = false;
   document.body.style.overflow = '';
@@ -990,9 +1071,16 @@ function closeDetail() {
   // la grilla y volvía a empezar desde arriba de la página.
   if (ultimaTarjeta && document.contains(ultimaTarjeta)) ultimaTarjeta.focus();
   ultimaTarjeta = null;
+  // Si el cierre lo disparó el X/backdrop/Escape (no el back del navegador),
+  // hay que consumir el estado que se empujó al abrir; si el cierre ya vino
+  // del propio evento popstate, el estado ya se consumió solo.
+  if (overlayHistoryPushed) {
+    overlayHistoryPushed = false;
+    if (!fromPopstate) history.back();
+  }
 }
 
-document.getElementById('sheet-close').addEventListener('click', closeDetail);
+document.getElementById('sheet-close').addEventListener('click', () => closeDetail());
 overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
 document.addEventListener('keydown', (e) => {
   if (overlay.hidden) return;
@@ -1001,6 +1089,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') { e.preventDefault(); stepPhoto(-1); }
   else if (e.key === 'ArrowRight') { e.preventDefault(); stepPhoto(1); }
 });
+window.addEventListener('popstate', () => { if (!overlay.hidden) closeDetail(true); });
 </script>
 </body>
 </html>
